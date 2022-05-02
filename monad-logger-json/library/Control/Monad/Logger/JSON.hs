@@ -1,4 +1,5 @@
 {-# LANGUAGE BlockArguments #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
@@ -49,7 +50,6 @@ import System.IO
 import System.Log.FastLogger.Internal (LogStr(..))
 import qualified Data.Aeson as Aeson
 import qualified Data.Aeson.Encoding as Aeson
-import qualified Data.Aeson.KeyMap as Aeson.KeyMap
 import qualified Data.ByteString.Builder as ByteString.Builder
 import qualified Data.ByteString.Char8 as ByteString.Char8
 import qualified Data.ByteString.Lazy as ByteString.Lazy
@@ -58,6 +58,12 @@ import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text.Encoding
 import qualified Data.Text.Encoding.Error as Text.Encoding.Error
 import qualified Data.Time as Time
+
+#if MIN_VERSION_aeson(2, 0, 0)
+import qualified Data.Aeson.KeyMap as AesonCompat (toList)
+#else
+import qualified Data.HashMap.Strict as AesonCompat (toList)
+#endif
 
 -- | Logs a message with the location provided by an implicit 'CallStack'.
 --
@@ -166,7 +172,7 @@ instance FromJSON Message where
     messageText <- obj .: "text"
     messageMeta <- do
       obj .:? "meta" >>= \case
-        Just (Object hashMap) -> pure $ Aeson.KeyMap.toList hashMap
+        Just (Object hashMap) -> pure $ AesonCompat.toList hashMap
         _ -> pure []
     pure $ messageText :& messageMeta
 
