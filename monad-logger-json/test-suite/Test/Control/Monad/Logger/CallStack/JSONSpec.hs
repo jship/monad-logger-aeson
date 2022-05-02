@@ -1,9 +1,9 @@
 {-# LANGUAGE BlockArguments #-}
-module Test.Control.Monad.Logger.JSONSpec
+module Test.Control.Monad.Logger.CallStack.JSONSpec
   ( spec
   ) where
 
-import Control.Monad.Logger.JSON ()
+import Control.Monad.Logger.CallStack.JSON ()
 import Test.Hspec (Spec, describe, it, shouldBe)
 
 spec :: Spec

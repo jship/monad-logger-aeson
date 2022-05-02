@@ -5,7 +5,7 @@ module Main
   ( main
   ) where
 
-import Control.Monad.Logger.JSON
+import Control.Monad.Logger.CallStack.JSON
 import Data.Aeson ((.=))
 import Data.Text (Text)
 

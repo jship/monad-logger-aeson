@@ -5,7 +5,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
-module Control.Monad.Logger.JSON
+module Control.Monad.Logger.CallStack.JSON
   ( module Log
 
   , Message(..)
@@ -68,36 +68,34 @@ import qualified Data.HashMap.Strict as AesonCompat (toList)
 -- | Logs a message with the location provided by an implicit 'CallStack'.
 --
 -- @since 0.1.0.0
-logDebug :: (HasCallStack, Log.MonadLogger m) => Message -> m ()
+logDebug :: (HasCallStack, MonadLogger m) => Message -> m ()
 logDebug = logDebugCS callStack
 
 -- | See 'logDebug'
 --
 -- @since 0.1.0.0
-logInfo :: (HasCallStack, Log.MonadLogger m) => Message -> m ()
+logInfo :: (HasCallStack, MonadLogger m) => Message -> m ()
 logInfo = logInfoCS callStack
 
 -- | See 'logDebug'
 --
 -- @since 0.1.0.0
-logWarn :: (HasCallStack, Log.MonadLogger m) => Message -> m ()
+logWarn :: (HasCallStack, MonadLogger m) => Message -> m ()
 logWarn = logWarnCS callStack
 
 -- | See 'logDebug'
 --
 -- @since 0.1.0.0
-logError :: (HasCallStack, Log.MonadLogger m) => Message -> m ()
+logError :: (HasCallStack, MonadLogger m) => Message -> m ()
 logError = logErrorCS callStack
 
 -- | See 'logDebug'
 --
 -- @since 0.1.0.0
-logOther :: (HasCallStack, Log.MonadLogger m) => Log.LogLevel -> Message -> m ()
+logOther :: (HasCallStack, MonadLogger m) => LogLevel -> Message -> m ()
 logOther = logOtherCS callStack
 
 -- | Logs a message with location given by 'CallStack'.
--- See 'Control.Monad.Logger.CallStack' for more convenient
--- functions for 'CallStack' based logging.
 --
 -- @since 0.1.0.0
 logDebugCS :: MonadLogger m => CallStack -> Message -> m ()

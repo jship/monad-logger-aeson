@@ -18,7 +18,7 @@ extra-source-files:
 
 library
   exposed-modules:
-      Control.Monad.Logger.JSON
+      Control.Monad.Logger.CallStack.JSON
   other-modules:
       Paths_monad_logger_json
   hs-source-dirs:
@@ -56,7 +56,7 @@ test-suite monad-logger-json-test-suite
   type: exitcode-stdio-1.0
   main-is: Driver.hs
   other-modules:
-      Test.Control.Monad.Logger.JSONSpec
+      Test.Control.Monad.Logger.CallStack.JSONSpec
       Paths_monad_logger_json
   hs-source-dirs:
       test-suite
