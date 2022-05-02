@@ -6,9 +6,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeApplications #-}
 module Control.Monad.Logger.CallStack.JSON
-  ( module Log
-
-  , Message(..)
+  ( Message(..)
 
   , logDebug
   , logInfo
@@ -20,21 +18,47 @@ module Control.Monad.Logger.CallStack.JSON
   , logWarnCS
   , logErrorCS
   , logOtherCS
-
-    -- TODO: Add variants for including 'LogSource'
+  , logDebugNS
+  , logInfoNS
+  , logWarnNS
+  , logErrorNS
+  , logOtherNS
 
   , runFileLoggingT
   , runStdoutLoggingT
   , runStderrLoggingT
   , defaultOutput
+
+  , module Log
   ) where
+
+-- N.B. This import is not grouped with the others as this makes it easier to
+-- cross-reference with this module's exports.
+import Control.Monad.Logger as Log hiding
+  ( logDebug
+  , logInfo
+  , logWarn
+  , logError
+  , logOther
+  , logDebugCS
+  , logInfoCS
+  , logWarnCS
+  , logErrorCS
+  , logOtherCS
+  , logDebugNS
+  , logInfoNS
+  , logWarnNS
+  , logErrorNS
+  , logOtherNS
+  , runFileLoggingT
+  , runStderrLoggingT
+  , runStdoutLoggingT
+  , defaultOutput
+  , defaultLogStr
+  )
 
 import Control.Exception.Lifted (bracket)
 import Control.Monad.Base (MonadBase(liftBase))
-import Control.Monad.Logger as Log hiding
-  ( defaultLogStr, defaultOutput, logDebug, logDebugCS, logError, logErrorCS, logInfo, logInfoCS
-  , logOther, logOtherCS, logWarn, logWarnCS, runFileLoggingT, runStderrLoggingT, runStdoutLoggingT
-  )
 import Control.Monad.Trans.Control (MonadBaseControl(..))
 import Data.Aeson (KeyValue((.=)), Value(..), (.:), (.:?), Encoding, FromJSON, ToJSON)
 import Data.Aeson.Types (Pair)
@@ -116,14 +140,39 @@ logWarnCS cs msg = logCS cs "" LevelWarn msg
 -- | See 'logDebugCS'
 --
 -- @since 0.1.0.0
-logErrorCS :: MonadLogger m => CallStack -> Message -> m ()
-logErrorCS cs msg = logCS cs "" LevelError msg
+logOtherCS :: MonadLogger m => CallStack -> LogLevel -> Message -> m ()
+logOtherCS cs lvl msg = logCS cs "" lvl msg
 
 -- | See 'logDebugCS'
 --
 -- @since 0.1.0.0
-logOtherCS :: MonadLogger m => CallStack -> LogLevel -> Message -> m ()
-logOtherCS cs lvl msg = logCS cs "" lvl msg
+logErrorCS :: MonadLogger m => CallStack -> Message -> m ()
+logErrorCS cs msg = logCS cs "" LevelError msg
+
+-- | Note that the @monad-logger@ version does not log location info. This
+-- @monad-logger-json@ version logs location info via call stack.
+logDebugNS :: (HasCallStack, MonadLogger m) => LogSource -> Message -> m ()
+logDebugNS src = logCS callStack src LevelDebug
+
+-- | Note that the @monad-logger@ version does not log location info. This
+-- @monad-logger-json@ version logs location info via call stack.
+logInfoNS :: (HasCallStack, MonadLogger m) => LogSource -> Message -> m ()
+logInfoNS src = logCS callStack src LevelInfo
+
+-- | Note that the @monad-logger@ version does not log location info. This
+-- @monad-logger-json@ version logs location info via call stack.
+logWarnNS :: (HasCallStack, MonadLogger m) => LogSource -> Message -> m ()
+logWarnNS src = logCS callStack src LevelWarn
+
+-- | Note that the @monad-logger@ version does not log location info. This
+-- @monad-logger-json@ version logs location info via call stack.
+logErrorNS :: (HasCallStack, MonadLogger m) => LogSource -> Message -> m ()
+logErrorNS src = logCS callStack src LevelError
+
+-- | Note that the @monad-logger@ version does not log location info. This
+-- @monad-logger-json@ version logs location info via call stack.
+logOtherNS :: (HasCallStack, MonadLogger m) => LogSource -> LogLevel -> Message -> m ()
+logOtherNS = logCS callStack
 
 -- | Not exported from 'monad-logger', so copied here.
 logCS :: (MonadLogger m)
