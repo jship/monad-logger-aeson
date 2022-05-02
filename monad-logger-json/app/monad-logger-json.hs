@@ -78,15 +78,15 @@ main = do
     --
     -- We can leverage the 'IsString' instance of 'Message' in the case when
     -- we don't have pairs.
-    logSomeJSON "some-source" LevelWarn "foo bar"
+    logDebug "foo bar"
 
     -- When we do have pairs, we can just tack on the pairs list with ':&.
-    logSomeJSON "some-source" LevelWarn $ "foo bar baz" :& []
-    logSomeJSON "some-source" LevelWarn $ "quux stuff" :&
+    logWarn $ "foo bar baz" :& []
+    logWarn $ "quux stuff" :&
       [ "bloorp" .= (42 :: Int)
       , "bonk" .= ("abc" :: Text)
       ]
-    logSomeJSON "some-source" LevelWarn $ "quux stuff 2" :&
+    logWarn $ "quux stuff 2" :&
       [ "foo" .= Just @Int 42
       , "bar" .= Nothing @Int
       ]

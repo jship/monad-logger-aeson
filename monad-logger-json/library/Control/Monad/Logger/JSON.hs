@@ -6,22 +6,33 @@
 {-# LANGUAGE TypeApplications #-}
 module Control.Monad.Logger.JSON
   ( module Log
+
+  , Message(..)
+
+  , logDebug
+  , logInfo
+  , logWarn
+  , logError
+  , logOther
+  , logDebugCS
+  , logInfoCS
+  , logWarnCS
+  , logErrorCS
+  , logOtherCS
+
+    -- TODO: Add variants for including 'LogSource'
+
   , runFileLoggingT
   , runStdoutLoggingT
   , runStderrLoggingT
   , defaultOutput
-
-  , Message(..)
-
-  , logSomeJSON -- TODO: Remove later!
   ) where
 
 import Control.Exception.Lifted (bracket)
 import Control.Monad.Base (MonadBase(liftBase))
-import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Logger as Log hiding
-  ( defaultLogStr, defaultOutput, logDebug, logDebugSH, logError, logErrorSH, logInfo, logInfoSH
-  , logOther, logOtherSH, logWarn, logWarnSH, runFileLoggingT, runStderrLoggingT, runStdoutLoggingT
+  ( defaultLogStr, defaultOutput, logDebug, logDebugCS, logError, logErrorCS, logInfo, logInfoCS
+  , logOther, logOtherCS, logWarn, logWarnCS, runFileLoggingT, runStderrLoggingT, runStdoutLoggingT
   )
 import Control.Monad.Trans.Control (MonadBaseControl(..))
 import Data.Aeson (KeyValue((.=)), Value(..), (.:), (.:?), Encoding, FromJSON, ToJSON)
@@ -30,6 +41,7 @@ import Data.ByteString.Char8 (ByteString)
 import Data.String (IsString)
 import Data.Text (Text)
 import Data.Time (UTCTime)
+import GHC.Stack (SrcLoc(..), CallStack, HasCallStack, callStack, getCallStack)
 import System.IO
   ( BufferMode(LineBuffering), IOMode(AppendMode), Handle, hClose, hSetBuffering, openFile, stderr
   , stdout
@@ -47,11 +59,95 @@ import qualified Data.Text.Encoding as Text.Encoding
 import qualified Data.Text.Encoding.Error as Text.Encoding.Error
 import qualified Data.Time as Time
 
--- TODO: Remove later - just for quick manual testing
--- In reality, we would provide the same variants that 'monad-logger' provides.
-logSomeJSON :: (MonadLogger m) => LogSource -> LogLevel -> Message -> m ()
-logSomeJSON logSource logLevel message = do
-  monadLoggerLog defaultLoc logSource logLevel $ toLogStr message
+-- | Logs a message with the location provided by an implicit 'CallStack'.
+--
+-- @since 0.1.0.0
+logDebug :: (HasCallStack, Log.MonadLogger m) => Message -> m ()
+logDebug = logDebugCS callStack
+
+-- | See 'logDebug'
+--
+-- @since 0.1.0.0
+logInfo :: (HasCallStack, Log.MonadLogger m) => Message -> m ()
+logInfo = logInfoCS callStack
+
+-- | See 'logDebug'
+--
+-- @since 0.1.0.0
+logWarn :: (HasCallStack, Log.MonadLogger m) => Message -> m ()
+logWarn = logWarnCS callStack
+
+-- | See 'logDebug'
+--
+-- @since 0.1.0.0
+logError :: (HasCallStack, Log.MonadLogger m) => Message -> m ()
+logError = logErrorCS callStack
+
+-- | See 'logDebug'
+--
+-- @since 0.1.0.0
+logOther :: (HasCallStack, Log.MonadLogger m) => Log.LogLevel -> Message -> m ()
+logOther = logOtherCS callStack
+
+-- | Logs a message with location given by 'CallStack'.
+-- See 'Control.Monad.Logger.CallStack' for more convenient
+-- functions for 'CallStack' based logging.
+--
+-- @since 0.1.0.0
+logDebugCS :: MonadLogger m => CallStack -> Message -> m ()
+logDebugCS cs msg = logCS cs "" LevelDebug msg
+
+-- | See 'logDebugCS'
+--
+-- @since 0.1.0.0
+logInfoCS :: MonadLogger m => CallStack -> Message -> m ()
+logInfoCS cs msg = logCS cs "" LevelInfo msg
+
+-- | See 'logDebugCS'
+--
+-- @since 0.1.0.0
+logWarnCS :: MonadLogger m => CallStack -> Message -> m ()
+logWarnCS cs msg = logCS cs "" LevelWarn msg
+
+-- | See 'logDebugCS'
+--
+-- @since 0.1.0.0
+logErrorCS :: MonadLogger m => CallStack -> Message -> m ()
+logErrorCS cs msg = logCS cs "" LevelError msg
+
+-- | See 'logDebugCS'
+--
+-- @since 0.1.0.0
+logOtherCS :: MonadLogger m => CallStack -> LogLevel -> Message -> m ()
+logOtherCS cs lvl msg = logCS cs "" lvl msg
+
+-- | Not exported from 'monad-logger', so copied here.
+logCS :: (MonadLogger m)
+      => CallStack
+      -> LogSource
+      -> LogLevel
+      -> Message
+      -> m ()
+logCS cs src lvl msg =
+  monadLoggerLog (locFromCS cs) src lvl msg
+
+-- | Not exported from 'monad-logger', so copied here.
+mkLoggerLoc :: SrcLoc -> Loc
+mkLoggerLoc loc =
+  Loc { loc_filename = srcLocFile loc
+      , loc_package  = srcLocPackage loc
+      , loc_module   = srcLocModule loc
+      , loc_start    = ( srcLocStartLine loc
+                       , srcLocStartCol loc)
+      , loc_end      = ( srcLocEndLine loc
+                       , srcLocEndCol loc)
+      }
+
+-- | Not exported from 'monad-logger', so copied here.
+locFromCS :: CallStack -> Loc
+locFromCS cs = case getCallStack cs of
+                 ((_, loc):_) -> mkLoggerLoc loc
+                 _            -> defaultLoc
 
 data LogItem = LogItem
   { logItemTimestamp :: UTCTime
@@ -212,13 +308,13 @@ runFileLoggingT fp logt =
 -- | Run a block using a @MonadLogger@ instance which prints to stderr.
 --
 -- @since 0.1.0.0
-runStderrLoggingT :: (MonadIO m) => LoggingT m a -> m a
+runStderrLoggingT :: LoggingT m a -> m a
 runStderrLoggingT = (`runLoggingT` defaultOutput stderr)
 
 -- | Run a block using a @MonadLogger@ instance which prints to stdout.
 --
 -- @since 0.1.0.0
-runStdoutLoggingT :: (MonadIO m) => LoggingT m a -> m a
+runStdoutLoggingT :: LoggingT m a -> m a
 runStdoutLoggingT = (`runLoggingT` defaultOutput stdout)
 
 isDefaultLoc :: Loc -> Bool
