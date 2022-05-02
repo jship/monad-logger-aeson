@@ -1,0 +1,70 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.34.4.
+--
+-- see: https://github.com/sol/hpack
+
+name:           monad-logger-json
+version:        0.0.0.0
+synopsis:       monad-logger-json synopsis
+description:    monad-logger-json description
+category:       System
+author:         Jason Shipman
+maintainer:     Jason Shipman
+copyright:      2022 (c) Jason Shipman
+build-type:     Simple
+extra-source-files:
+    package.yaml
+
+library
+  exposed-modules:
+      Control.Monad.Logger.JSON
+  other-modules:
+      Paths_monad_logger_json
+  hs-source-dirs:
+      library
+  ghc-options: -Wall -fwarn-tabs -Wincomplete-uni-patterns -Wredundant-constraints
+  build-depends:
+      aeson
+    , base
+    , bytestring
+    , fast-logger
+    , lifted-base
+    , monad-control
+    , monad-logger
+    , text
+    , time
+    , transformers-base
+    , unordered-containers
+  default-language: Haskell2010
+
+executable monad-logger-json
+  main-is: monad-logger-json.hs
+  other-modules:
+      Paths_monad_logger_json
+  hs-source-dirs:
+      app
+  ghc-options: -Wall -fwarn-tabs -Wincomplete-uni-patterns -Wredundant-constraints
+  build-depends:
+      aeson
+    , base
+    , monad-logger-json
+    , text
+  default-language: Haskell2010
+
+test-suite monad-logger-json-test-suite
+  type: exitcode-stdio-1.0
+  main-is: Driver.hs
+  other-modules:
+      Test.Control.Monad.Logger.JSONSpec
+      Paths_monad_logger_json
+  hs-source-dirs:
+      test-suite
+  ghc-options: -Wall -fwarn-tabs -Wincomplete-uni-patterns -Wredundant-constraints
+  build-tool-depends:
+      hspec-discover:hspec-discover
+  build-depends:
+      base
+    , hspec
+    , monad-logger-json
+  default-language: Haskell2010

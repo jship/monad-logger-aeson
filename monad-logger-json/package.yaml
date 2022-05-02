@@ -1,0 +1,53 @@
+name: monad-logger-json
+version: '0.0.0.0'
+copyright: 2022 (c) Jason Shipman
+author: "Jason Shipman"
+maintainer: "Jason Shipman"
+synopsis: monad-logger-json synopsis
+description: monad-logger-json description
+category: System
+
+extra-source-files:
+- package.yaml
+
+ghc-options:
+  - -Wall
+  - -fwarn-tabs
+  - -Wincomplete-uni-patterns
+  - -Wredundant-constraints
+
+library:
+  dependencies:
+  - aeson
+  - base
+  - bytestring
+  - fast-logger
+  - lifted-base
+  - monad-control
+  - monad-logger
+  - text
+  - time
+  - transformers-base
+  - unordered-containers
+  source-dirs: library
+
+tests:
+  monad-logger-json-test-suite:
+    source-dirs: test-suite
+    main: Driver.hs
+    build-tools:
+    - hspec-discover
+    dependencies:
+    - base
+    - hspec
+    - monad-logger-json
+
+executables:
+  monad-logger-json:
+    source-dirs: app
+    main: monad-logger-json.hs
+    dependencies:
+    - aeson
+    - base
+    - monad-logger-json
+    - text
