@@ -28,7 +28,6 @@ library:
   - text
   - time
   - transformers-base
-  - unordered-containers
   source-dirs: library
 
 tests:
