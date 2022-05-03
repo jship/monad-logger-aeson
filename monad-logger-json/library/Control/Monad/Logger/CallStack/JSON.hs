@@ -1,10 +1,9 @@
 {-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE StrictData #-}
 module Control.Monad.Logger.CallStack.JSON
   ( Message(..)
 
@@ -210,9 +209,31 @@ data LogItem = LogItem
   , logItemMessage :: Message
   }
 
-data Message = Text :& [Pair]
-  deriving Show -- TODO: Remove later!
-infixr 5 :&
+-- | A 'Message' captures a textual component and a metadata component. The
+-- metadata component is a list of 'Pair' to support tacking on arbitrary
+-- structured data to a log message.
+--
+-- With the @OverloadedStrings@ extension enabled, 'Message' values can be
+-- constructed without metadata fairly conveniently, just as if we were using
+-- 'Text' directly:
+--
+-- > logDebug "Some log message without metadata"
+--
+-- Metadata may be included in a 'Message' via the ':#' constructor:
+--
+-- > logDebug $ "Some log message with metadata" :#
+-- >   [ "bloorp" .= (42 :: Int)
+-- >   , "bonk" .= ("abc" :: Text)
+-- >   ]
+--
+-- The mneomic for the ':#' constructor is that the @#@ symbol is sometimes
+-- referred to as a hash, a JSON object can be thought of as a hash map, and
+-- so with @:#@ (and enough squinting), we are @cons@-ing a textual message onto
+-- a JSON object. Yes, this mnemonic isn't well-typed, but hopefully it still
+-- helps!
+data Message = Text :# [Pair]
+
+infixr 5 :#
 
 instance FromJSON Message where
   parseJSON = Aeson.withObject "Message" \obj -> do
@@ -221,7 +242,7 @@ instance FromJSON Message where
       obj .:? "meta" >>= \case
         Just (Object hashMap) -> pure $ AesonCompat.toList hashMap
         _ -> pure []
-    pure $ messageText :& messageMeta
+    pure $ messageText :# messageMeta
 
 instance ToJSON Message where
   toJSON message =
@@ -232,7 +253,7 @@ instance ToJSON Message where
           else
             ["meta" .= Aeson.object messageMeta]
     where
-    messageText :& messageMeta = message
+    messageText :# messageMeta = message
 
   toEncoding message =
     Aeson.pairs $
@@ -249,13 +270,13 @@ instance ToJSON Message where
         $ mconcat
         $ fmap (uncurry (.=)) pairs
 
-    messageText :& messageMeta = message
+    messageText :# messageMeta = message
 
 instance ToLogStr Message where
   toLogStr = toLogStr . Aeson.encode
 
 instance IsString Message where
-  fromString string = Text.pack string :& []
+  fromString string = Text.pack string :# []
 
 logItemEncoding :: LogItem -> Encoding
 logItemEncoding logItem =
@@ -327,7 +348,7 @@ defaultLogStrBS now loc logSource logLevel logStr =
   logItem :: LogItem
   logItem =
     case Aeson.decode @Message logStrLBS of
-      Nothing -> mkLogItem $ logStrText :& []
+      Nothing -> mkLogItem $ logStrText :# []
       Just message -> mkLogItem message
 
   mkLogItem :: Message -> LogItem
