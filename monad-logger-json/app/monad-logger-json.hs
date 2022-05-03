@@ -8,30 +8,31 @@ module Main
 import Control.Monad.Logger.CallStack.JSON
 import Data.Aeson ((.=))
 import Data.Text (Text)
+import qualified Control.Monad.Logger.CallStack as Log
 
 -- $ stack run monad-logger-json | jq
 -- {
---   "timestamp": "2022-05-03T00:22:47.0859033Z",
+--   "timestamp": "2022-05-03T01:18:44.0026364Z",
 --   "level": "info",
 --   "message": {
 --     "text": "some message text"
 --   }
 -- }
 -- {
---   "timestamp": "2022-05-03T00:22:47.0859889Z",
+--   "timestamp": "2022-05-03T01:18:44.0027108Z",
 --   "level": "debug",
 --   "message": {
 --     "text": "some message text"
 --   }
 -- }
 -- {
---   "timestamp": "2022-05-03T00:22:47.0859985Z",
+--   "timestamp": "2022-05-03T01:18:44.0027213Z",
 --   "level": "debug",
 --   "location": {
 --     "package": "main",
 --     "module": "Main",
 --     "file": "app/monad-logger-json.hs",
---     "line": 112,
+--     "line": 105,
 --     "char": 5
 --   },
 --   "message": {
@@ -39,13 +40,13 @@ import Data.Text (Text)
 --   }
 -- }
 -- {
---   "timestamp": "2022-05-03T00:22:47.0860342Z",
+--   "timestamp": "2022-05-03T01:18:44.0027377Z",
 --   "level": "warn",
 --   "location": {
 --     "package": "main",
 --     "module": "Main",
 --     "file": "app/monad-logger-json.hs",
---     "line": 115,
+--     "line": 108,
 --     "char": 5
 --   },
 --   "message": {
@@ -53,13 +54,13 @@ import Data.Text (Text)
 --   }
 -- }
 -- {
---   "timestamp": "2022-05-03T00:22:47.0860481Z",
+--   "timestamp": "2022-05-03T01:18:44.0027493Z",
 --   "level": "warn",
 --   "location": {
 --     "package": "main",
 --     "module": "Main",
 --     "file": "app/monad-logger-json.hs",
---     "line": 116,
+--     "line": 109,
 --     "char": 5
 --   },
 --   "message": {
@@ -71,20 +72,20 @@ import Data.Text (Text)
 --   }
 -- }
 -- {
---   "timestamp": "2022-05-03T00:22:47.0860773Z",
+--   "timestamp": "2022-05-03T01:18:44.0027636Z",
 --   "level": "warn",
 --   "location": {
 --     "package": "main",
 --     "module": "Main",
 --     "file": "app/monad-logger-json.hs",
---     "line": 120,
+--     "line": 113,
 --     "char": 5
 --   },
 --   "message": {
 --     "text": "quux stuff 2",
 --     "meta": {
---       "bar": null,
---       "foo": 42
+--       "foo": 42,
+--       "bar": null
 --     }
 --   }
 -- }
@@ -93,8 +94,8 @@ main = do
   runStdoutLoggingT do
     -- We can use functions from 'monad-logger' directly if we want, though we
     -- won't be able to log pairs with these functions.
-    logInfoN "some message text"
-    logDebugN "some message text"
+    Log.logInfoN "some message text"
+    Log.logDebugN "some message text"
 
     -- Pretend 'logSomeJSON' was instead some standard 'monad-logger' name
     -- like 'logInfoNS' (it isn't right now out of laziness/quick testing).

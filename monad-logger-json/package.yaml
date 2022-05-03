@@ -49,5 +49,6 @@ executables:
     dependencies:
     - aeson
     - base
+    - monad-logger
     - monad-logger-json
     - text
