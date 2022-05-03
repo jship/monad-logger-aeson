@@ -11,40 +11,57 @@ import Data.Text (Text)
 
 -- $ stack run monad-logger-json | jq
 -- {
---   "timestamp": "2022-05-02T01:50:32.9352623Z",
+--   "timestamp": "2022-05-03T00:22:47.0859033Z",
 --   "level": "info",
---   "source": "some-source",
 --   "message": {
 --     "text": "some message text"
 --   }
 -- }
 -- {
---   "timestamp": "2022-05-02T01:50:32.9353538Z",
+--   "timestamp": "2022-05-03T00:22:47.0859889Z",
 --   "level": "debug",
 --   "message": {
 --     "text": "some message text"
 --   }
 -- }
 -- {
---   "timestamp": "2022-05-02T01:50:32.9353712Z",
---   "level": "warn",
---   "source": "some-source",
+--   "timestamp": "2022-05-03T00:22:47.0859985Z",
+--   "level": "debug",
+--   "location": {
+--     "package": "main",
+--     "module": "Main",
+--     "file": "app/monad-logger-json.hs",
+--     "line": 112,
+--     "char": 5
+--   },
 --   "message": {
---     "text": "foo bar"
+--     "text": "Some log message without metadata"
 --   }
 -- }
 -- {
---   "timestamp": "2022-05-02T01:50:32.9354058Z",
+--   "timestamp": "2022-05-03T00:22:47.0860342Z",
 --   "level": "warn",
---   "source": "some-source",
+--   "location": {
+--     "package": "main",
+--     "module": "Main",
+--     "file": "app/monad-logger-json.hs",
+--     "line": 115,
+--     "char": 5
+--   },
 --   "message": {
 --     "text": "foo bar baz"
 --   }
 -- }
 -- {
---   "timestamp": "2022-05-02T01:50:32.9354215Z",
+--   "timestamp": "2022-05-03T00:22:47.0860481Z",
 --   "level": "warn",
---   "source": "some-source",
+--   "location": {
+--     "package": "main",
+--     "module": "Main",
+--     "file": "app/monad-logger-json.hs",
+--     "line": 116,
+--     "char": 5
+--   },
 --   "message": {
 --     "text": "quux stuff",
 --     "meta": {
@@ -54,9 +71,15 @@ import Data.Text (Text)
 --   }
 -- }
 -- {
---   "timestamp": "2022-05-02T01:50:32.9354496Z",
+--   "timestamp": "2022-05-03T00:22:47.0860773Z",
 --   "level": "warn",
---   "source": "some-source",
+--   "location": {
+--     "package": "main",
+--     "module": "Main",
+--     "file": "app/monad-logger-json.hs",
+--     "line": 120,
+--     "char": 5
+--   },
 --   "message": {
 --     "text": "quux stuff 2",
 --     "meta": {
@@ -70,7 +93,7 @@ main = do
   runStdoutLoggingT do
     -- We can use functions from 'monad-logger' directly if we want, though we
     -- won't be able to log pairs with these functions.
-    logInfoNS "some-source" "some message text"
+    logInfoN "some message text"
     logDebugN "some message text"
 
     -- Pretend 'logSomeJSON' was instead some standard 'monad-logger' name
