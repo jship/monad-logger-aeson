@@ -178,13 +178,13 @@ logCS :: (MonadLogger m)
       -> Message
       -> m ()
 logCS cs src lvl msg =
-  monadLoggerLog (locFromCS cs) src lvl $ nullCharLogStr <> toLogStr msg
-  where
-  nullCharLogStr :: LogStr
-  nullCharLogStr =
-    toLogStr
-      $ ByteString.Lazy.Char8.singleton
-      $ Char.chr 0
+  monadLoggerLog (locFromCS cs) src lvl $ xonCharLogStr <> toLogStr msg
+
+xonCharLogStr :: LogStr
+xonCharLogStr = toLogStr $ ByteString.Lazy.Char8.singleton $ xonChar
+
+xonChar :: Char
+xonChar = Char.chr 17
 
 -- | Not exported from 'monad-logger', so copied here.
 mkLoggerLoc :: SrcLoc -> Loc
@@ -338,7 +338,7 @@ defaultLogStrBS now loc logSource logLevel logStr =
       Just (c, lbs) ->
         -- If the first character of the log string is a null byte, then we
         -- assume the log string (minus the null byte) is an encoded 'Message'.
-        if c == Char.chr 0 then
+        if c == xonChar then
           mkLogItem
             $ Aeson.unsafeToEncoding
             $ ByteString.Builder.lazyByteString lbs
