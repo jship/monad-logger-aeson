@@ -379,8 +379,8 @@ defaultLogStrBS now commonMeta loc logSource logLevel logStr =
           $ unsafeMessageEncoding
           $ Text.empty :# []
       Just (c, lbs) ->
-        -- If the first character of the log string is a null byte, then we
-        -- assume the log string (minus the null byte) is an encoded 'Message'.
+        -- If the first character of the log string is a XON byte, then we
+        -- assume the log string (minus the XON byte) is an encoded 'Message'.
         if c == xonChar then
           mkLogItem
             $ Aeson.unsafeToEncoding
