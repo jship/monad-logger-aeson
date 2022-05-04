@@ -12,80 +12,104 @@ import qualified Control.Monad.Logger.CallStack as Log
 
 -- $ stack run monad-logger-json | jq
 -- {
---   "timestamp": "2022-05-03T01:18:44.0026364Z",
+--   "time": "2022-05-04T01:21:39.9578648Z",
 --   "level": "info",
 --   "message": {
---     "text": "some message text"
+--     "text": "some message text",
+--     "commonMeta": {
+--       "stuff": "things2",
+--       "reqId": "345"
+--     }
 --   }
 -- }
 -- {
---   "timestamp": "2022-05-03T01:18:44.0027108Z",
+--   "time": "2022-05-04T01:21:39.957959Z",
 --   "level": "debug",
 --   "message": {
---     "text": "some message text"
+--     "text": "some message text",
+--     "commonMeta": {
+--       "stuff": "things2",
+--       "reqId": "345"
+--     }
 --   }
 -- }
 -- {
---   "timestamp": "2022-05-03T01:18:44.0027213Z",
+--   "time": "2022-05-04T01:21:39.9579727Z",
 --   "level": "debug",
 --   "location": {
 --     "package": "main",
 --     "module": "Main",
 --     "file": "app/monad-logger-json.hs",
---     "line": 105,
---     "char": 5
+--     "line": 113,
+--     "char": 13
 --   },
 --   "message": {
---     "text": "Some log message without metadata"
+--     "text": "Some log message without metadata",
+--     "commonMeta": {
+--       "stuff": "things2",
+--       "reqId": "345"
+--     }
 --   }
 -- }
 -- {
---   "timestamp": "2022-05-03T01:18:44.0027377Z",
+--   "time": "2022-05-04T01:21:39.957991Z",
 --   "level": "warn",
 --   "location": {
 --     "package": "main",
 --     "module": "Main",
 --     "file": "app/monad-logger-json.hs",
---     "line": 108,
---     "char": 5
+--     "line": 116,
+--     "char": 13
 --   },
 --   "message": {
---     "text": "foo bar baz"
+--     "text": "foo bar baz",
+--     "commonMeta": {
+--       "stuff": "things2",
+--       "reqId": "345"
+--     }
 --   }
 -- }
 -- {
---   "timestamp": "2022-05-03T01:18:44.0027493Z",
+--   "time": "2022-05-04T01:21:39.9580048Z",
 --   "level": "warn",
 --   "location": {
 --     "package": "main",
 --     "module": "Main",
 --     "file": "app/monad-logger-json.hs",
---     "line": 109,
---     "char": 5
+--     "line": 117,
+--     "char": 13
 --   },
 --   "message": {
 --     "text": "quux stuff",
 --     "meta": {
 --       "bloorp": 42,
 --       "bonk": "abc"
+--     },
+--     "commonMeta": {
+--       "stuff": "things2",
+--       "reqId": "345"
 --     }
 --   }
 -- }
 -- {
---   "timestamp": "2022-05-03T01:18:44.0027636Z",
+--   "time": "2022-05-04T01:21:39.9580192Z",
 --   "level": "warn",
 --   "location": {
 --     "package": "main",
 --     "module": "Main",
 --     "file": "app/monad-logger-json.hs",
---     "line": 113,
---     "char": 5
+--     "line": 121,
+--     "char": 13
 --   },
 --   "message": {
 --     "text": "quux stuff 2",
 --     "meta": {
 --       "foo": 42,
 --       "bar": null
+--     },
+--     "commonMeta": {
+--       "stuff": "things2",
+--       "reqId": "345"
 --     }
 --   }
 -- }
