@@ -1,4 +1,5 @@
 {-# LANGUAGE BlockArguments #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
@@ -23,6 +24,8 @@ module Control.Monad.Logger.CallStack.JSON
   , logWarnNS
   , logErrorNS
   , logOtherNS
+
+  , withCommonMeta
 
   , runFileLoggingT
   , runStdoutLoggingT
@@ -57,12 +60,17 @@ import Control.Monad.Logger as Log hiding
   , defaultLogStr
   )
 
+import Context (Store)
 import Control.Exception.Lifted (bracket)
 import Control.Monad.Base (MonadBase(liftBase))
+import Control.Monad.Catch (MonadMask)
+import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Trans.Control (MonadBaseControl(..))
-import Data.Aeson (KeyValue((.=)), Encoding)
+import Data.Aeson (KeyValue((.=)), Encoding, Value)
+import Data.Aeson.Encoding.Internal (Series(..), (><))
 import Data.Aeson.Types (Pair)
 import Data.ByteString.Char8 (ByteString)
+import Data.HashMap.Strict (HashMap)
 import Data.String (IsString)
 import Data.Text (Text)
 import Data.Time (UTCTime)
@@ -72,18 +80,28 @@ import System.IO
   , stdout
   )
 import System.Log.FastLogger.Internal (LogStr(..))
+import qualified Context
 import qualified Data.Aeson as Aeson
 import qualified Data.Aeson.Encoding as Aeson
+import qualified Data.Aeson.Encoding.Internal as Aeson.Internal
 import qualified Data.ByteString.Builder as ByteString.Builder
 import qualified Data.ByteString.Char8 as ByteString.Char8
 import qualified Data.ByteString.Lazy as ByteString.Lazy
 import qualified Data.ByteString.Lazy.Char8 as ByteString.Lazy.Char8
 import qualified Data.Char as Char
+import qualified Data.HashMap.Strict as HashMap
 import qualified Data.String as String
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text.Encoding
 import qualified Data.Text.Encoding.Error as Text.Encoding.Error
 import qualified Data.Time as Time
+import qualified System.IO.Unsafe as IO.Unsafe
+
+#if MIN_VERSION_aeson(2, 0, 0)
+import Data.Aeson.Key (Key)
+#else
+type Key = Text
+#endif
 
 -- | Logs a message with the location provided by an implicit 'CallStack'.
 --
@@ -178,7 +196,7 @@ logCS :: (MonadLogger m)
       -> Message
       -> m ()
 logCS cs src lvl msg =
-  monadLoggerLog (locFromCS cs) src lvl $ xonCharLogStr <> toLogStr msg
+  monadLoggerLog (locFromCS cs) src lvl $ xonCharLogStr <> messageToLogStr msg
 
 xonCharLogStr :: LogStr
 xonCharLogStr = toLogStr $ ByteString.Lazy.Char8.singleton $ xonChar
@@ -215,7 +233,7 @@ data LogItem = LogItem
 logItemEncoding :: LogItem -> Encoding
 logItemEncoding logItem =
   Aeson.pairs $
-    (Aeson.pairStr "timestamp" $ Aeson.toEncoding logItemTimestamp)
+    (Aeson.pairStr "time" $ Aeson.toEncoding logItemTimestamp)
       <> (Aeson.pairStr "level" $ levelEncoding logItemLevel)
       <> ( if isDefaultLoc logItemLoc then
              mempty
@@ -262,29 +280,51 @@ logItemEncoding logItem =
 data Message = Text :# [Pair]
 infixr 5 :#
 
-instance ToLogStr Message where
-  toLogStr = toLogStr . Aeson.encodingToLazyByteString . messageEncoding
+messageToLogStr :: Message -> LogStr
+messageToLogStr = toLogStr . Aeson.encodingToLazyByteString . unsafeMessageEncoding
 
 instance IsString Message where
   fromString string = Text.pack string :# []
 
-messageEncoding :: Message -> Encoding
-messageEncoding message =
-  Aeson.pairs $
-    "text" .= messageText
-      <> ( if null messageMeta then
-             mempty
-           else
-             Aeson.pairStr "meta" $ messageMetaEncoding messageMeta
-         )
+-- This is "unsafe" because the encoding here is just a comma-separated
+-- list of fields. It is not yet wrapped in curly braces.
+unsafeMessageEncoding :: Message -> Encoding
+unsafeMessageEncoding  = unsafeRetagSeries . messageSeries
+
+finalizeMessageEncoding :: [Pair] -> Encoding -> Encoding
+finalizeMessageEncoding commonMeta messageEnc =
+  Aeson.Internal.openCurly
+    >< messageEnc
+    >< ( if null commonMeta then
+           Aeson.Internal.empty
+         else
+           Aeson.Internal.comma >< unsafeRetagSeries
+             ( Aeson.pairStr "commonMeta" $ messageMetaEncoding commonMeta
+             )
+       )
+    >< Aeson.Internal.closeCurly
+
+unsafeRetagSeries :: Series -> Encoding
+unsafeRetagSeries = \case
+  Value seriesEncoding -> Aeson.Internal.retagEncoding seriesEncoding
+  Empty -> bug "unsafeRetagSeries"
+
+messageSeries :: Message -> Series
+messageSeries message =
+  "text" .= messageText
+    <> ( if null messageMeta then
+           mempty
+         else
+           Aeson.pairStr "meta" $ messageMetaEncoding messageMeta
+       )
   where
   messageText :# messageMeta = message
 
 messageMetaEncoding :: [Pair] -> Encoding
-messageMetaEncoding pairs =
-  Aeson.pairs
-    $ mconcat
-    $ fmap (uncurry (.=)) pairs
+messageMetaEncoding = Aeson.pairs . messageMetaSeries
+
+messageMetaSeries :: [Pair] -> Series
+messageMetaSeries = mconcat . fmap (uncurry (.=))
 
 levelEncoding :: LogLevel -> Encoding
 levelEncoding = Aeson.text . \case
@@ -314,16 +354,19 @@ defaultOutput
   -> IO ()
 defaultOutput h loc src level msg = do
   now <- Time.getCurrentTime
-  ByteString.Char8.hPutStrLn h $ defaultLogStrBS now loc src level msg
+  commonMeta <- Context.mines messageMetaStore HashMap.toList
+  ByteString.Char8.hPutStrLn h
+    $ defaultLogStrBS now commonMeta loc src level msg
 
 defaultLogStrBS
   :: UTCTime
+  -> [Pair]
   -> Loc
   -> LogSource
   -> LogLevel
   -> LogStr
   -> ByteString
-defaultLogStrBS now loc logSource logLevel logStr =
+defaultLogStrBS now commonMeta loc logSource logLevel logStr =
   ByteString.Lazy.toStrict
     $ Aeson.encodingToLazyByteString
     $ logItemEncoding logItem
@@ -333,7 +376,7 @@ defaultLogStrBS now loc logSource logLevel logStr =
     case ByteString.Lazy.Char8.uncons logStrLBS of
       Nothing ->
         mkLogItem
-          $ messageEncoding
+          $ unsafeMessageEncoding
           $ Text.empty :# []
       Just (c, lbs) ->
         -- If the first character of the log string is a null byte, then we
@@ -346,7 +389,7 @@ defaultLogStrBS now loc logSource logLevel logStr =
         -- to text and use this text in a metadata-less 'Message'.
         else
           mkLogItem
-            $ messageEncoding
+            $ unsafeMessageEncoding
             $ decodeLenient logStrLBS :# []
 
   mkLogItem :: Encoding -> LogItem
@@ -356,7 +399,7 @@ defaultLogStrBS now loc logSource logLevel logStr =
       , logItemLoc = loc
       , logItemLogSource = logSource
       , logItemLevel = logLevel
-      , logItemMessageEncoding = messageEnc
+      , logItemMessageEncoding = finalizeMessageEncoding commonMeta messageEnc
       }
 
   decodeLenient =
@@ -391,3 +434,23 @@ runStdoutLoggingT = (`runLoggingT` defaultOutput stdout)
 isDefaultLoc :: Loc -> Bool
 isDefaultLoc (Loc "<unknown>" "<unknown>" "<unknown>" (0,0) (0,0)) = True
 isDefaultLoc _ = False
+
+withCommonMeta :: (MonadIO m, MonadMask m) => [Pair] -> m a -> m a
+withCommonMeta pairs =
+  Context.adjust messageMetaStore \pairsMap ->
+    HashMap.union (HashMap.fromList pairs) pairsMap
+
+messageMetaStore :: Store (HashMap Key Value)
+messageMetaStore =
+  IO.Unsafe.unsafePerformIO
+    $ Context.newStore Context.defaultPropagation
+    $ Just
+    $ HashMap.empty
+{-# NOINLINE messageMetaStore #-}
+
+bug :: HasCallStack => String -> a
+bug detail =
+  error $
+    "Control.Monad.Logger.CallStack.JSON: " <> detail <>" (if you see this "
+      <> "message, please  report it as a bug at "
+      <> "https://github.com/jship/monad-logger-json)"

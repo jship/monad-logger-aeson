@@ -21,6 +21,8 @@ library:
   - aeson
   - base
   - bytestring
+  - context >=0.2.0.0 && <0.3
+  - exceptions
   - fast-logger
   - lifted-base
   - monad-control
@@ -28,6 +30,7 @@ library:
   - text
   - time
   - transformers-base
+  - unordered-containers
   source-dirs: library
 
 tests:

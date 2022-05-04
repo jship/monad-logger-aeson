@@ -91,26 +91,34 @@ import qualified Control.Monad.Logger.CallStack as Log
 -- }
 main :: IO ()
 main = do
-  runStdoutLoggingT do
-    -- We can use functions from 'monad-logger' directly if we want, though we
-    -- won't be able to log pairs with these functions.
-    Log.logInfoN "some message text"
-    Log.logDebugN "some message text"
+--  Log.runFileLoggingT "foo.txt" do
+--    logInfo "some message text"
+--    logDebug "some message text"
+--    logDebug $ "some message text" :# ["abc" .= (42 :: Int)]
+  withCommonMeta ["reqId" .= (123 :: Int)] $
+    withCommonMeta ["stuff" .= ("things" :: Text)] $
+      withCommonMeta ["stuff" .= ("things2" :: Text)] $
+        withCommonMeta ["reqId" .= ("345" :: Text)] $
+          runStdoutLoggingT do
+            -- We can use functions from 'monad-logger' directly if we want, though we
+            -- won't be able to log pairs with these functions.
+            Log.logInfoN "some message text"
+            Log.logDebugN "some message text"
 
-    -- Pretend 'logSomeJSON' was instead some standard 'monad-logger' name
-    -- like 'logInfoNS' (it isn't right now out of laziness/quick testing).
-    --
-    -- We can leverage the 'IsString' instance of 'Message' in the case when
-    -- we don't have pairs.
-    logDebug "Some log message without metadata"
+            -- Pretend 'logSomeJSON' was instead some standard 'monad-logger' name
+            -- like 'logInfoNS' (it isn't right now out of laziness/quick testing).
+            --
+            -- We can leverage the 'IsString' instance of 'Message' in the case when
+            -- we don't have pairs.
+            logDebug "Some log message without metadata"
 
-    -- When we do have pairs, we can just tack on the pairs list with ':#'.
-    logWarn $ "foo bar baz" :# []
-    logWarn $ "quux stuff" :#
-      [ "bloorp" .= (42 :: Int)
-      , "bonk" .= ("abc" :: Text)
-      ]
-    logWarn $ "quux stuff 2" :#
-      [ "foo" .= Just @Int 42
-      , "bar" .= Nothing @Int
-      ]
+            -- When we do have pairs, we can just tack on the pairs list with ':#'.
+            logWarn $ "foo bar baz" :# []
+            logWarn $ "quux stuff" :#
+              [ "bloorp" .= (42 :: Int)
+              , "bonk" .= ("abc" :: Text)
+              ]
+            logWarn $ "quux stuff 2" :#
+              [ "foo" .= Just @Int 42
+              , "bar" .= Nothing @Int
+              ]
