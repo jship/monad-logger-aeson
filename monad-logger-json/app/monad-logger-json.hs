@@ -12,71 +12,71 @@ import qualified Control.Monad.Logger.CallStack as Log
 
 -- $ stack run monad-logger-json | jq
 -- {
---   "time": "2022-05-04T01:21:39.9578648Z",
+--   "time": "2022-05-07T19:15:37.9342478Z",
 --   "level": "info",
 --   "message": {
 --     "text": "some message text",
---     "commonMeta": {
+--     "context": {
 --       "stuff": "things2",
 --       "reqId": "345"
 --     }
 --   }
 -- }
 -- {
---   "time": "2022-05-04T01:21:39.957959Z",
+--   "time": "2022-05-07T19:15:37.9343293Z",
 --   "level": "debug",
 --   "message": {
 --     "text": "some message text",
---     "commonMeta": {
+--     "context": {
 --       "stuff": "things2",
 --       "reqId": "345"
 --     }
 --   }
 -- }
 -- {
---   "time": "2022-05-04T01:21:39.9579727Z",
+--   "time": "2022-05-07T19:15:37.9343411Z",
 --   "level": "debug",
 --   "location": {
 --     "package": "main",
 --     "module": "Main",
 --     "file": "app/monad-logger-json.hs",
---     "line": 113,
+--     "line": 137,
 --     "char": 13
 --   },
 --   "message": {
 --     "text": "Some log message without metadata",
---     "commonMeta": {
+--     "context": {
 --       "stuff": "things2",
 --       "reqId": "345"
 --     }
 --   }
 -- }
 -- {
---   "time": "2022-05-04T01:21:39.957991Z",
+--   "time": "2022-05-07T19:15:37.9343595Z",
 --   "level": "warn",
 --   "location": {
 --     "package": "main",
 --     "module": "Main",
 --     "file": "app/monad-logger-json.hs",
---     "line": 116,
+--     "line": 140,
 --     "char": 13
 --   },
 --   "message": {
 --     "text": "foo bar baz",
---     "commonMeta": {
+--     "context": {
 --       "stuff": "things2",
 --       "reqId": "345"
 --     }
 --   }
 -- }
 -- {
---   "time": "2022-05-04T01:21:39.9580048Z",
+--   "time": "2022-05-07T19:15:37.9343725Z",
 --   "level": "warn",
 --   "location": {
 --     "package": "main",
 --     "module": "Main",
 --     "file": "app/monad-logger-json.hs",
---     "line": 117,
+--     "line": 141,
 --     "char": 13
 --   },
 --   "message": {
@@ -85,20 +85,20 @@ import qualified Control.Monad.Logger.CallStack as Log
 --       "bloorp": 42,
 --       "bonk": "abc"
 --     },
---     "commonMeta": {
+--     "context": {
 --       "stuff": "things2",
 --       "reqId": "345"
 --     }
 --   }
 -- }
 -- {
---   "time": "2022-05-04T01:21:39.9580192Z",
+--   "time": "2022-05-07T19:15:37.934387Z",
 --   "level": "warn",
 --   "location": {
 --     "package": "main",
 --     "module": "Main",
 --     "file": "app/monad-logger-json.hs",
---     "line": 121,
+--     "line": 145,
 --     "char": 13
 --   },
 --   "message": {
@@ -107,7 +107,7 @@ import qualified Control.Monad.Logger.CallStack as Log
 --       "foo": 42,
 --       "bar": null
 --     },
---     "commonMeta": {
+--     "context": {
 --       "stuff": "things2",
 --       "reqId": "345"
 --     }
@@ -119,10 +119,10 @@ main = do
 --    logInfo "some message text"
 --    logDebug "some message text"
 --    logDebug $ "some message text" :# ["abc" .= (42 :: Int)]
-  withCommonMeta ["reqId" .= (123 :: Int)] $
-    withCommonMeta ["stuff" .= ("things" :: Text)] $
-      withCommonMeta ["stuff" .= ("things2" :: Text)] $
-        withCommonMeta ["reqId" .= ("345" :: Text)] $
+  withThreadContext ["reqId" .= (123 :: Int)] $
+    withThreadContext ["stuff" .= ("things" :: Text)] $
+      withThreadContext ["stuff" .= ("things2" :: Text)] $
+        withThreadContext ["reqId" .= ("345" :: Text)] $
           runStdoutLoggingT do
             -- We can use functions from 'monad-logger' directly if we want, though we
             -- won't be able to log pairs with these functions.

@@ -25,7 +25,7 @@ module Control.Monad.Logger.CallStack.JSON
   , logErrorNS
   , logOtherNS
 
-  , withCommonMeta
+  , withThreadContext
 
   , runFileLoggingT
   , runStdoutLoggingT
@@ -292,14 +292,14 @@ unsafeMessageEncoding :: Message -> Encoding
 unsafeMessageEncoding  = unsafeRetagSeries . messageSeries
 
 finalizeMessageEncoding :: [Pair] -> Encoding -> Encoding
-finalizeMessageEncoding commonMeta messageEnc =
+finalizeMessageEncoding threadContext messageEnc =
   Aeson.Internal.openCurly
     >< messageEnc
-    >< ( if null commonMeta then
+    >< ( if null threadContext then
            Aeson.Internal.empty
          else
            Aeson.Internal.comma >< unsafeRetagSeries
-             ( Aeson.pairStr "commonMeta" $ messageMetaEncoding commonMeta
+             ( Aeson.pairStr "context" $ messageMetaEncoding threadContext
              )
        )
     >< Aeson.Internal.closeCurly
@@ -354,9 +354,9 @@ defaultOutput
   -> IO ()
 defaultOutput h loc src level msg = do
   now <- Time.getCurrentTime
-  commonMeta <- Context.mines messageMetaStore HashMap.toList
+  threadContext <- Context.mines messageMetaStore HashMap.toList
   ByteString.Char8.hPutStrLn h
-    $ defaultLogStrBS now commonMeta loc src level msg
+    $ defaultLogStrBS now threadContext loc src level msg
 
 defaultLogStrBS
   :: UTCTime
@@ -366,7 +366,7 @@ defaultLogStrBS
   -> LogLevel
   -> LogStr
   -> ByteString
-defaultLogStrBS now commonMeta loc logSource logLevel logStr =
+defaultLogStrBS now threadContext loc logSource logLevel logStr =
   ByteString.Lazy.toStrict
     $ Aeson.encodingToLazyByteString
     $ logItemEncoding logItem
@@ -399,7 +399,7 @@ defaultLogStrBS now commonMeta loc logSource logLevel logStr =
       , logItemLoc = loc
       , logItemLogSource = logSource
       , logItemLevel = logLevel
-      , logItemMessageEncoding = finalizeMessageEncoding commonMeta messageEnc
+      , logItemMessageEncoding = finalizeMessageEncoding threadContext messageEnc
       }
 
   decodeLenient =
@@ -435,8 +435,8 @@ isDefaultLoc :: Loc -> Bool
 isDefaultLoc (Loc "<unknown>" "<unknown>" "<unknown>" (0,0) (0,0)) = True
 isDefaultLoc _ = False
 
-withCommonMeta :: (MonadIO m, MonadMask m) => [Pair] -> m a -> m a
-withCommonMeta pairs =
+withThreadContext :: (MonadIO m, MonadMask m) => [Pair] -> m a -> m a
+withThreadContext pairs =
   Context.adjust messageMetaStore \pairsMap ->
     HashMap.union (HashMap.fromList pairs) pairsMap
 
