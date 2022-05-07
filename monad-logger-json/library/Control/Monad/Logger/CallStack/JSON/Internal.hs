@@ -5,12 +5,13 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE StrictData #-}
 module Control.Monad.Logger.CallStack.JSON.Internal
   ( -- * Disclaimer
     -- $disclaimer
 
-    -- ** Message-related
+    -- ** @Message@-related
     Message(..)
   , LoggedMessage(..)
   , messageMetaStore
@@ -22,7 +23,10 @@ module Control.Monad.Logger.CallStack.JSON.Internal
   , messageEncoding
   , messageSeries
 
-    -- ** Log item-related
+    -- ** @Logger@-related
+  , Logger(..)
+
+    -- ** @LogItem@-related
   , LogItem(..)
   , logItemEncoding
 
@@ -41,7 +45,9 @@ module Control.Monad.Logger.CallStack.JSON.Internal
   ) where
 
 import Context (Store)
-import Control.Monad.Logger (Loc(..), LogLevel(..), MonadLogger(..), ToLogStr(..), LogSource)
+import Control.Monad.Logger
+  ( Loc(..), LogLevel(..), MonadLogger(..), ToLogStr(..), LogSource, LoggingT
+  )
 import Data.Aeson (KeyValue((.=)), Value(String), (.:), (.:?), Encoding, FromJSON, ToJSON)
 import Data.Aeson.Encoding.Internal (Series(..))
 import Data.Aeson.Types (Pair, Parser)
@@ -75,9 +81,13 @@ import qualified System.IO.Unsafe as IO.Unsafe
 import Data.Aeson.Key (Key)
 import qualified Data.Aeson.KeyMap as AesonCompat (toList)
 #else
+import qualified Data.HashMap.Strict as AesonCompat (toList)
 type Key = Text
-import qualified Data.Hashmap.Strict as AesonCompat (toList)
 #endif
+
+newtype Logger = Logger
+  { withLogging :: forall m a. LoggingT m a -> m a
+  }
 
 data LoggedMessage = LoggedMessage
   { loggedMessageTimestamp :: UTCTime
