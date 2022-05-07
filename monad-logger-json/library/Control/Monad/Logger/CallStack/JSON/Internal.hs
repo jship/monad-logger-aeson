@@ -1,5 +1,7 @@
 {-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -47,6 +49,7 @@ import Data.HashMap.Strict (HashMap)
 import Data.String (IsString)
 import Data.Text (Text)
 import Data.Time (UTCTime)
+import GHC.Generics (Generic)
 import GHC.Stack (SrcLoc(..), CallStack, getCallStack)
 import System.Log.FastLogger.Internal (LogStr(..))
 import qualified Context
@@ -83,7 +86,7 @@ data LoggedMessage = LoggedMessage
   , loggedMessageLogSource :: Maybe LogSource
   , loggedMessageThreadContext :: [Pair]
   , loggedMessageMessage :: Message
-  }
+  } deriving stock (Eq, Generic, Ord, Show)
 
 instance FromJSON LoggedMessage where
   parseJSON = Aeson.withObject "LoggedMessage" \obj ->
@@ -216,6 +219,7 @@ instance ToJSON LoggedMessage where
 -- a JSON object. Yes, this mnemonic isn't well-typed, but hopefully it still
 -- helps!
 data Message = Text :# [Pair]
+  deriving stock (Eq, Generic, Ord, Show)
 infixr 5 :#
 
 instance IsString Message where
