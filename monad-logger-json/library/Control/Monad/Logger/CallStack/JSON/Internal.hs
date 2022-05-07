@@ -110,7 +110,7 @@ messageMetaStore =
 {-# NOINLINE messageMetaStore #-}
 
 defaultOutputWith
-  :: (BS8.ByteString -> IO ())
+  :: (LogLevel -> BS8.ByteString -> IO ())
   -> Loc
   -> LogSource
   -> LogLevel
@@ -121,7 +121,7 @@ defaultOutputWith f loc src level msg = do
   threadIdText <- fmap (Text.pack . show) Concurrent.myThreadId
   threadContext <- Context.mines messageMetaStore \hashMap ->
     HashMap.toList $ HashMap.insert "tid" (String threadIdText) hashMap
-  f $ defaultLogStrBS now threadContext loc src level msg
+  f level $ defaultLogStrBS now threadContext loc src level msg
 
 defaultLogStrBS
   :: UTCTime
@@ -193,8 +193,9 @@ logCS
   -> LogLevel
   -> Message
   -> m ()
-logCS cs src lvl msg =
-  monadLoggerLog (locFromCS cs) src lvl $ xonCharLogStr <> messageToLogStr msg
+logCS cs logSource logLevel msg =
+  monadLoggerLog (locFromCS cs) logSource logLevel
+    $ xonCharLogStr <> messageToLogStr msg
 
 xonCharLogStr :: LogStr
 xonCharLogStr = toLogStr $ LBS8.singleton $ xonChar
@@ -271,7 +272,7 @@ levelEncoding = Aeson.text . \case
   LevelInfo -> "info"
   LevelWarn -> "warn"
   LevelError -> "error"
-  LevelOther t -> t
+  LevelOther otherLevel -> otherLevel
 
 locEncoding :: Loc -> Encoding
 locEncoding loc =

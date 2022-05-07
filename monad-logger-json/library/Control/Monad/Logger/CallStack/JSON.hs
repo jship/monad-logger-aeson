@@ -1,5 +1,6 @@
 {-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Control.Monad.Logger.CallStack.JSON
   ( Message(..)
@@ -23,13 +24,17 @@ module Control.Monad.Logger.CallStack.JSON
   , withThreadContext
 
   , runFileLoggingT
+  , runHandleLoggingT
   , runStdoutLoggingT
   , runStderrLoggingT
   , runFastLoggingT
 
   , defaultOutput
+  , handleOutput
   , fastLoggerOutput
   , defaultLogStr
+
+  , defaultHandleFromLevel
 
   , module Log
   ) where
@@ -67,6 +72,7 @@ import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Logger.CallStack.JSON.Internal (Message(..))
 import Control.Monad.Trans.Control (MonadBaseControl(..))
 import Data.Aeson.Types (Pair)
+import Data.Text (Text)
 import Data.Time (UTCTime)
 import GHC.Stack (CallStack, HasCallStack, callStack)
 import System.IO
@@ -192,6 +198,15 @@ runStderrLoggingT = flip runLoggingT (defaultOutput stderr)
 runStdoutLoggingT :: LoggingT m a -> m a
 runStdoutLoggingT = flip runLoggingT (defaultOutput stdout)
 
+-- | Run a block using a @MonadLogger@ instance which prints to a 'Handle'
+-- determined by the log message's 'LogLevel'. A common use case for this
+-- function is to log warn/error messages to @stderr@ and debug/info messages
+-- to @stdout@.
+--
+-- @since 0.1.0.0
+runHandleLoggingT :: (LogLevel -> Handle) -> LoggingT m a -> m a
+runHandleLoggingT = flip runLoggingT . handleOutput
+
 -- | Run a block using a @MonadLogger@ instance which appends to the specified
 -- 'LoggerSet'.
 --
@@ -206,7 +221,18 @@ defaultOutput
   -> LogLevel
   -> LogStr
   -> IO ()
-defaultOutput handle = Internal.defaultOutputWith (BS8.hPutStrLn handle)
+defaultOutput handle = handleOutput (const handle)
+
+handleOutput
+  :: (LogLevel -> Handle)
+  -> Loc
+  -> LogSource
+  -> LogLevel
+  -> LogStr
+  -> IO ()
+handleOutput levelToHandle =
+  Internal.defaultOutputWith \logLevel bytes -> do
+    BS8.hPutStrLn (levelToHandle logLevel) bytes
 
 fastLoggerOutput
   :: LoggerSet
@@ -216,7 +242,8 @@ fastLoggerOutput
   -> LogStr
   -> IO ()
 fastLoggerOutput loggerSet =
-  Internal.defaultOutputWith (FastLogger.pushLogStrLn loggerSet . toLogStr)
+  Internal.defaultOutputWith \_logLevel bytes -> do
+    FastLogger.pushLogStrLn loggerSet $ toLogStr bytes
 
 defaultLogStr
   :: UTCTime
@@ -229,3 +256,11 @@ defaultLogStr
 defaultLogStr now threadContext loc logSource logLevel logStr =
   toLogStr
     $ Internal.defaultLogStrBS now threadContext loc logSource logLevel logStr
+
+defaultHandleFromLevel :: (Text -> Handle) -> LogLevel -> Handle
+defaultHandleFromLevel otherLevelToHandle = \case
+  LevelDebug -> stdout
+  LevelInfo -> stdout
+  LevelWarn -> stderr
+  LevelError -> stderr
+  LevelOther otherLevel -> otherLevelToHandle otherLevel
