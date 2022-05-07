@@ -171,6 +171,8 @@ logErrorNS src = Internal.logCS callStack src LevelError
 logOtherNS :: (HasCallStack, MonadLogger m) => LogSource -> LogLevel -> Message -> m ()
 logOtherNS = Internal.logCS callStack
 
+-- | Stub. Add some notes about similarity to MDC (maped diagnostic context
+-- from log4j) and ThreadContext (from log4j2).
 withThreadContext :: (MonadIO m, MonadMask m) => [Pair] -> m a -> m a
 withThreadContext pairs =
   Context.adjust Internal.messageMetaStore \pairsMap ->
