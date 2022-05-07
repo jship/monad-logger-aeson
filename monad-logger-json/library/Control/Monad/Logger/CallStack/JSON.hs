@@ -22,13 +22,13 @@ module Control.Monad.Logger.CallStack.JSON
 
   , withThreadContext
 
-  , runFastLoggingT
   , runFileLoggingT
   , runStdoutLoggingT
   , runStderrLoggingT
+  , runFastLoggingT
 
-  , fastLoggerOutput
   , defaultOutput
+  , fastLoggerOutput
   , defaultLogStr
 
   , module Log
@@ -171,13 +171,6 @@ withThreadContext pairs =
     HashMap.union (HashMap.fromList pairs) pairsMap
 
 -- | Run a block using a @MonadLogger@ instance which appends to the specified
--- 'LoggerSet'.
---
--- @since 0.1.0.0
-runFastLoggingT :: LoggerSet -> LoggingT m a -> m a
-runFastLoggingT loggerSet = flip runLoggingT (fastLoggerOutput loggerSet)
-
--- | Run a block using a @MonadLogger@ instance which appends to the specified
 -- file.
 --
 -- @since 0.1.0.0
@@ -199,15 +192,12 @@ runStderrLoggingT = flip runLoggingT (defaultOutput stderr)
 runStdoutLoggingT :: LoggingT m a -> m a
 runStdoutLoggingT = flip runLoggingT (defaultOutput stdout)
 
-fastLoggerOutput
-  :: LoggerSet
-  -> Loc
-  -> LogSource
-  -> LogLevel
-  -> LogStr
-  -> IO ()
-fastLoggerOutput loggerSet =
-  Internal.defaultOutputWith (FastLogger.pushLogStrLn loggerSet . toLogStr)
+-- | Run a block using a @MonadLogger@ instance which appends to the specified
+-- 'LoggerSet'.
+--
+-- @since 0.1.0.0
+runFastLoggingT :: LoggerSet -> LoggingT m a -> m a
+runFastLoggingT loggerSet = flip runLoggingT (fastLoggerOutput loggerSet)
 
 defaultOutput
   :: Handle
@@ -217,6 +207,16 @@ defaultOutput
   -> LogStr
   -> IO ()
 defaultOutput handle = Internal.defaultOutputWith (BS8.hPutStrLn handle)
+
+fastLoggerOutput
+  :: LoggerSet
+  -> Loc
+  -> LogSource
+  -> LogLevel
+  -> LogStr
+  -> IO ()
+fastLoggerOutput loggerSet =
+  Internal.defaultOutputWith (FastLogger.pushLogStrLn loggerSet . toLogStr)
 
 defaultLogStr
   :: UTCTime
