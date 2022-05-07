@@ -10,6 +10,7 @@ module Control.Monad.Logger.CallStack.JSON.Internal
 
     -- ** Message-related
     Message(..)
+  , LoggedMessage(..)
   , messageMetaStore
   , logCS
   , defaultOutputWith
@@ -38,12 +39,10 @@ module Control.Monad.Logger.CallStack.JSON.Internal
   ) where
 
 import Context (Store)
-import Control.Monad.Logger
-  ( Loc(..), LogLevel(..), MonadLogger(..), ToLogStr(..), LogSource, defaultLoc
-  )
-import Data.Aeson (KeyValue((.=)), Value(String), Encoding)
+import Control.Monad.Logger (Loc(..), LogLevel(..), MonadLogger(..), ToLogStr(..), LogSource)
+import Data.Aeson (KeyValue((.=)), Value(String), (.:), (.:?), Encoding, FromJSON, ToJSON)
 import Data.Aeson.Encoding.Internal (Series(..))
-import Data.Aeson.Types (Pair)
+import Data.Aeson.Types (Pair, Parser)
 import Data.HashMap.Strict (HashMap)
 import Data.String (IsString)
 import Data.Text (Text)
@@ -52,6 +51,7 @@ import GHC.Stack (SrcLoc(..), CallStack, getCallStack)
 import System.Log.FastLogger.Internal (LogStr(..))
 import qualified Context
 import qualified Control.Concurrent as Concurrent
+import qualified Control.Monad.Logger as Logger
 import qualified Data.Aeson as Aeson
 import qualified Data.Aeson.Encoding as Aeson
 import qualified Data.ByteString.Builder as Builder
@@ -60,6 +60,7 @@ import qualified Data.ByteString.Lazy as LBS
 import qualified Data.ByteString.Lazy.Char8 as LBS8
 import qualified Data.Char as Char
 import qualified Data.HashMap.Strict as HashMap
+import qualified Data.Maybe as Maybe
 import qualified Data.String as String
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text.Encoding
@@ -69,9 +70,128 @@ import qualified System.IO.Unsafe as IO.Unsafe
 
 #if MIN_VERSION_aeson(2, 0, 0)
 import Data.Aeson.Key (Key)
+import qualified Data.Aeson.KeyMap as AesonCompat (toList)
 #else
 type Key = Text
+import qualified Data.Hashmap.Strict as AesonCompat (toList)
 #endif
+
+data LoggedMessage = LoggedMessage
+  { loggedMessageTimestamp :: UTCTime
+  , loggedMessageLevel :: LogLevel
+  , loggedMessageLoc :: Maybe Loc
+  , loggedMessageLogSource :: Maybe LogSource
+  , loggedMessageThreadContext :: [Pair]
+  , loggedMessageMessage :: Message
+  }
+
+instance FromJSON LoggedMessage where
+  parseJSON = Aeson.withObject "LoggedMessage" \obj ->
+    LoggedMessage
+      <$> obj .: "time"
+      <*> fmap logLevelFromText (obj .: "level")
+      <*> (obj .:? "location" >>= parseLoc)
+      <*> obj .:? "source"
+      <*> (obj .:? "context" >>= parsePairs)
+      <*> (obj .: "message" >>= parseMessage)
+    where
+    logLevelFromText :: Text -> LogLevel
+    logLevelFromText = \case
+      "debug" -> LevelDebug
+      "info" -> LevelInfo
+      "warn" -> LevelWarn
+      "error" -> LevelError
+      other -> LevelOther other
+
+    parseLoc :: Maybe Value -> Parser (Maybe Loc)
+    parseLoc =
+      traverse $ Aeson.withObject "Loc" \obj ->
+        Loc
+          <$> obj .: "package"
+          <*> obj .: "module"
+          <*> obj .: "file"
+          <*> obj .: "line"
+          <*> obj .: "char"
+
+    parsePairs :: Maybe Value -> Parser [Pair]
+    parsePairs = \case
+      Nothing -> pure []
+      Just value -> flip (Aeson.withObject "[Pair]") value \obj -> do
+        pure $ AesonCompat.toList obj
+
+    parseMessage :: Value -> Parser Message
+    parseMessage = Aeson.withObject "Message" \obj ->
+      (:#)
+        <$> obj .: "text"
+        <*> (obj .:? "meta" >>= parsePairs)
+
+instance ToJSON LoggedMessage where
+  toJSON loggedMessage =
+    Aeson.object $ Maybe.catMaybes
+      [ Just $ "time" .= loggedMessageTimestamp
+      , Just $ "level" .= logLevelToText loggedMessageLevel
+      , case loggedMessageLoc of
+          Nothing -> Nothing
+          Just loc -> Just $ "location" .= locToJSON loc
+      , case loggedMessageLogSource of
+          Nothing -> Nothing
+          Just logSource -> Just $ "source" .= logSource
+      , case loggedMessageThreadContext of
+          [] -> Nothing
+          pairs -> Just $ "context" .= Aeson.object pairs
+      , Just $ "message" .= messageToJSON loggedMessageMessage
+      ]
+    where
+    locToJSON :: Loc -> Value
+    locToJSON loc =
+      Aeson.object
+        [ "package" .= loc_package
+        , "module" .= loc_module
+        , "file" .= loc_filename
+        , "line" .= fst loc_start
+        , "char" .= snd loc_start
+        ]
+      where
+      Loc { loc_filename, loc_package, loc_module, loc_start } = loc
+
+    messageToJSON :: Message -> Value
+    messageToJSON (messageText :# messageMeta) =
+      Aeson.object $ Maybe.catMaybes
+        [ Just $ "text" .= messageText
+        , case messageMeta of
+            [] -> Nothing
+            pairs -> Just $ "meta" .= Aeson.object pairs
+        ]
+
+    LoggedMessage
+      { loggedMessageTimestamp
+      , loggedMessageLevel
+      , loggedMessageLoc
+      , loggedMessageLogSource
+      , loggedMessageThreadContext
+      , loggedMessageMessage
+      } = loggedMessage
+
+  toEncoding loggedMessage = logItemEncoding logItem
+    where
+    logItem =
+      LogItem
+        { logItemTimestamp = loggedMessageTimestamp
+        , logItemLoc = Maybe.fromMaybe Logger.defaultLoc loggedMessageLoc
+        , logItemLogSource = Maybe.fromMaybe "" loggedMessageLogSource
+        , logItemLevel = loggedMessageLevel
+        , logItemThreadContext = loggedMessageThreadContext
+        , logItemMessageEncoding = messageEncoding loggedMessageMessage
+        }
+
+    LoggedMessage
+      { loggedMessageTimestamp
+      , loggedMessageLevel
+      , loggedMessageLoc
+      , loggedMessageLogSource
+      , loggedMessageThreadContext
+      , loggedMessageMessage
+      } = loggedMessage
 
 -- | A 'Message' captures a textual component and a metadata component. The
 -- metadata component is a list of 'Pair' to support tacking on arbitrary
@@ -267,7 +387,10 @@ pairsSeries :: [Pair] -> Series
 pairsSeries = mconcat . fmap (uncurry (.=))
 
 levelEncoding :: LogLevel -> Encoding
-levelEncoding = Aeson.text . \case
+levelEncoding = Aeson.text . logLevelToText
+
+logLevelToText :: LogLevel -> Text
+logLevelToText = \case
   LevelDebug -> "debug"
   LevelInfo -> "info"
   LevelWarn -> "warn"
@@ -301,7 +424,7 @@ mkLoggerLoc loc =
 locFromCS :: CallStack -> Loc
 locFromCS cs = case getCallStack cs of
                  ((_, loc):_) -> mkLoggerLoc loc
-                 _            -> defaultLoc
+                 _            -> Logger.defaultLoc
 
 -- | Not exported from 'monad-logger', so copied here.
 isDefaultLoc :: Loc -> Bool

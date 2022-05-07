@@ -4,6 +4,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Control.Monad.Logger.CallStack.JSON
   ( Message(..)
+  , LoggedMessage(..)
 
   , logDebug
   , logInfo
@@ -69,7 +70,7 @@ import Control.Exception.Lifted (bracket)
 import Control.Monad.Base (MonadBase(liftBase))
 import Control.Monad.Catch (MonadMask)
 import Control.Monad.IO.Class (MonadIO)
-import Control.Monad.Logger.CallStack.JSON.Internal (Message(..))
+import Control.Monad.Logger.CallStack.JSON.Internal (LoggedMessage(..), Message(..))
 import Control.Monad.Trans.Control (MonadBaseControl(..))
 import Data.Aeson.Types (Pair)
 import Data.Text (Text)
