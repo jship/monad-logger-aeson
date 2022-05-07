@@ -66,7 +66,7 @@ import Control.Monad.Base (MonadBase(liftBase))
 import Control.Monad.Catch (MonadMask)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Trans.Control (MonadBaseControl(..))
-import Data.Aeson (KeyValue((.=)), Encoding, Value)
+import Data.Aeson (KeyValue((.=)), Value(String), Encoding)
 import Data.Aeson.Encoding.Internal (Series(..))
 import Data.Aeson.Types (Pair)
 import Data.ByteString.Char8 (ByteString)
@@ -81,6 +81,7 @@ import System.IO
   )
 import System.Log.FastLogger.Internal (LogStr(..))
 import qualified Context
+import qualified Control.Concurrent as Concurrent
 import qualified Data.Aeson as Aeson
 import qualified Data.Aeson.Encoding as Aeson
 import qualified Data.ByteString.Builder as ByteString.Builder
@@ -248,7 +249,7 @@ logItemEncoding logItem =
       <> ( if null logItemThreadContext then
              mempty
            else
-             Aeson.pairStr "context" $ messageMetaEncoding logItemThreadContext
+             Aeson.pairStr "context" $ pairsEncoding logItemThreadContext
          )
       <> (Aeson.pairStr "message" logItemMessageEncoding)
   where
@@ -301,16 +302,16 @@ messageSeries message =
     <> ( if null messageMeta then
            mempty
          else
-           Aeson.pairStr "meta" $ messageMetaEncoding messageMeta
+           Aeson.pairStr "meta" $ pairsEncoding messageMeta
        )
   where
   messageText :# messageMeta = message
 
-messageMetaEncoding :: [Pair] -> Encoding
-messageMetaEncoding = Aeson.pairs . messageMetaSeries
+pairsEncoding :: [Pair] -> Encoding
+pairsEncoding = Aeson.pairs . pairsSeries
 
-messageMetaSeries :: [Pair] -> Series
-messageMetaSeries = mconcat . fmap (uncurry (.=))
+pairsSeries :: [Pair] -> Series
+pairsSeries = mconcat . fmap (uncurry (.=))
 
 levelEncoding :: LogLevel -> Encoding
 levelEncoding = Aeson.text . \case
@@ -340,7 +341,9 @@ defaultOutput
   -> IO ()
 defaultOutput h loc src level msg = do
   now <- Time.getCurrentTime
-  threadContext <- Context.mines messageMetaStore HashMap.toList
+  threadIdText <- fmap (Text.pack . show) Concurrent.myThreadId
+  threadContext <- Context.mines messageMetaStore \hashMap ->
+    HashMap.toList $ HashMap.insert "tid" (String threadIdText) hashMap
   ByteString.Char8.hPutStrLn h
     $ defaultLogStrBS now threadContext loc src level msg
 

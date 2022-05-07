@@ -12,9 +12,10 @@ import qualified Control.Monad.Logger.CallStack as Log
 
 -- $ stack run monad-logger-json | jq
 -- {
---   "time": "2022-05-07T19:30:58.7354333Z",
+--   "time": "2022-05-07T20:03:54.0101865Z",
 --   "level": "info",
 --   "context": {
+--     "tid": "ThreadId 1",
 --     "stuff": "things2",
 --     "reqId": "345"
 --   },
@@ -23,9 +24,10 @@ import qualified Control.Monad.Logger.CallStack as Log
 --   }
 -- }
 -- {
---   "time": "2022-05-07T19:30:58.7355133Z",
+--   "time": "2022-05-07T20:03:54.0102703Z",
 --   "level": "debug",
 --   "context": {
+--     "tid": "ThreadId 1",
 --     "stuff": "things2",
 --     "reqId": "345"
 --   },
@@ -34,16 +36,17 @@ import qualified Control.Monad.Logger.CallStack as Log
 --   }
 -- }
 -- {
---   "time": "2022-05-07T19:30:58.7355242Z",
+--   "time": "2022-05-07T20:03:54.0102972Z",
 --   "level": "debug",
 --   "location": {
 --     "package": "main",
 --     "module": "Main",
 --     "file": "app/monad-logger-json.hs",
---     "line": 137,
+--     "line": 144,
 --     "char": 13
 --   },
 --   "context": {
+--     "tid": "ThreadId 1",
 --     "stuff": "things2",
 --     "reqId": "345"
 --   },
@@ -52,16 +55,17 @@ import qualified Control.Monad.Logger.CallStack as Log
 --   }
 -- }
 -- {
---   "time": "2022-05-07T19:30:58.7355428Z",
+--   "time": "2022-05-07T20:03:54.0103285Z",
 --   "level": "warn",
 --   "location": {
 --     "package": "main",
 --     "module": "Main",
 --     "file": "app/monad-logger-json.hs",
---     "line": 140,
+--     "line": 147,
 --     "char": 13
 --   },
 --   "context": {
+--     "tid": "ThreadId 1",
 --     "stuff": "things2",
 --     "reqId": "345"
 --   },
@@ -70,16 +74,17 @@ import qualified Control.Monad.Logger.CallStack as Log
 --   }
 -- }
 -- {
---   "time": "2022-05-07T19:30:58.7355557Z",
+--   "time": "2022-05-07T20:03:54.0103543Z",
 --   "level": "warn",
 --   "location": {
 --     "package": "main",
 --     "module": "Main",
 --     "file": "app/monad-logger-json.hs",
---     "line": 141,
+--     "line": 148,
 --     "char": 13
 --   },
 --   "context": {
+--     "tid": "ThreadId 1",
 --     "stuff": "things2",
 --     "reqId": "345"
 --   },
@@ -92,16 +97,17 @@ import qualified Control.Monad.Logger.CallStack as Log
 --   }
 -- }
 -- {
---   "time": "2022-05-07T19:30:58.7355695Z",
+--   "time": "2022-05-07T20:03:54.0103792Z",
 --   "level": "warn",
 --   "location": {
 --     "package": "main",
 --     "module": "Main",
 --     "file": "app/monad-logger-json.hs",
---     "line": 145,
+--     "line": 152,
 --     "char": 13
 --   },
 --   "context": {
+--     "tid": "ThreadId 1",
 --     "stuff": "things2",
 --     "reqId": "345"
 --   },
