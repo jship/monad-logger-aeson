@@ -12,29 +12,29 @@ import qualified Control.Monad.Logger.CallStack as Log
 
 -- $ stack run monad-logger-json | jq
 -- {
---   "time": "2022-05-07T19:15:37.9342478Z",
+--   "time": "2022-05-07T19:30:58.7354333Z",
 --   "level": "info",
+--   "context": {
+--     "stuff": "things2",
+--     "reqId": "345"
+--   },
 --   "message": {
---     "text": "some message text",
---     "context": {
---       "stuff": "things2",
---       "reqId": "345"
---     }
+--     "text": "some message text"
 --   }
 -- }
 -- {
---   "time": "2022-05-07T19:15:37.9343293Z",
+--   "time": "2022-05-07T19:30:58.7355133Z",
 --   "level": "debug",
+--   "context": {
+--     "stuff": "things2",
+--     "reqId": "345"
+--   },
 --   "message": {
---     "text": "some message text",
---     "context": {
---       "stuff": "things2",
---       "reqId": "345"
---     }
+--     "text": "some message text"
 --   }
 -- }
 -- {
---   "time": "2022-05-07T19:15:37.9343411Z",
+--   "time": "2022-05-07T19:30:58.7355242Z",
 --   "level": "debug",
 --   "location": {
 --     "package": "main",
@@ -43,16 +43,16 @@ import qualified Control.Monad.Logger.CallStack as Log
 --     "line": 137,
 --     "char": 13
 --   },
+--   "context": {
+--     "stuff": "things2",
+--     "reqId": "345"
+--   },
 --   "message": {
---     "text": "Some log message without metadata",
---     "context": {
---       "stuff": "things2",
---       "reqId": "345"
---     }
+--     "text": "Some log message without metadata"
 --   }
 -- }
 -- {
---   "time": "2022-05-07T19:15:37.9343595Z",
+--   "time": "2022-05-07T19:30:58.7355428Z",
 --   "level": "warn",
 --   "location": {
 --     "package": "main",
@@ -61,16 +61,16 @@ import qualified Control.Monad.Logger.CallStack as Log
 --     "line": 140,
 --     "char": 13
 --   },
+--   "context": {
+--     "stuff": "things2",
+--     "reqId": "345"
+--   },
 --   "message": {
---     "text": "foo bar baz",
---     "context": {
---       "stuff": "things2",
---       "reqId": "345"
---     }
+--     "text": "foo bar baz"
 --   }
 -- }
 -- {
---   "time": "2022-05-07T19:15:37.9343725Z",
+--   "time": "2022-05-07T19:30:58.7355557Z",
 --   "level": "warn",
 --   "location": {
 --     "package": "main",
@@ -79,20 +79,20 @@ import qualified Control.Monad.Logger.CallStack as Log
 --     "line": 141,
 --     "char": 13
 --   },
+--   "context": {
+--     "stuff": "things2",
+--     "reqId": "345"
+--   },
 --   "message": {
 --     "text": "quux stuff",
 --     "meta": {
 --       "bloorp": 42,
 --       "bonk": "abc"
---     },
---     "context": {
---       "stuff": "things2",
---       "reqId": "345"
 --     }
 --   }
 -- }
 -- {
---   "time": "2022-05-07T19:15:37.934387Z",
+--   "time": "2022-05-07T19:30:58.7355695Z",
 --   "level": "warn",
 --   "location": {
 --     "package": "main",
@@ -101,18 +101,19 @@ import qualified Control.Monad.Logger.CallStack as Log
 --     "line": 145,
 --     "char": 13
 --   },
+--   "context": {
+--     "stuff": "things2",
+--     "reqId": "345"
+--   },
 --   "message": {
 --     "text": "quux stuff 2",
 --     "meta": {
 --       "foo": 42,
 --       "bar": null
---     },
---     "context": {
---       "stuff": "things2",
---       "reqId": "345"
 --     }
 --   }
 -- }
+
 main :: IO ()
 main = do
 --  Log.runFileLoggingT "foo.txt" do
