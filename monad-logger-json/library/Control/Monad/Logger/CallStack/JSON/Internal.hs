@@ -1,3 +1,4 @@
+{-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
@@ -11,7 +12,9 @@ module Control.Monad.Logger.CallStack.JSON.Internal
     Message(..)
   , messageMetaStore
   , logCS
+  , defaultOutputWith
   , defaultLogStrBS
+  , defaultLogStrLBS
   , messageToLogStr
   , messageEncoding
   , messageSeries
@@ -38,10 +41,9 @@ import Context (Store)
 import Control.Monad.Logger
   ( Loc(..), LogLevel(..), MonadLogger(..), ToLogStr(..), LogSource, defaultLoc
   )
-import Data.Aeson (KeyValue((.=)), Encoding, Value)
+import Data.Aeson (KeyValue((.=)), Value(String), Encoding)
 import Data.Aeson.Encoding.Internal (Series(..))
 import Data.Aeson.Types (Pair)
-import Data.ByteString.Char8 (ByteString)
 import Data.HashMap.Strict (HashMap)
 import Data.String (IsString)
 import Data.Text (Text)
@@ -49,17 +51,21 @@ import Data.Time (UTCTime)
 import GHC.Stack (SrcLoc(..), CallStack, getCallStack)
 import System.Log.FastLogger.Internal (LogStr(..))
 import qualified Context
+import qualified Control.Concurrent as Concurrent
 import qualified Data.Aeson as Aeson
 import qualified Data.Aeson.Encoding as Aeson
 import qualified Data.ByteString.Builder as ByteString.Builder
+import qualified Data.ByteString.Char8 as BS
 import qualified Data.ByteString.Lazy as ByteString.Lazy
 import qualified Data.ByteString.Lazy.Char8 as ByteString.Lazy.Char8
+import qualified Data.ByteString.Lazy.Char8 as LBS
 import qualified Data.Char as Char
 import qualified Data.HashMap.Strict as HashMap
 import qualified Data.String as String
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text.Encoding
 import qualified Data.Text.Encoding.Error as Text.Encoding.Error
+import qualified Data.Time as Time
 import qualified System.IO.Unsafe as IO.Unsafe
 
 #if MIN_VERSION_aeson(2, 0, 0)
@@ -104,6 +110,20 @@ messageMetaStore =
     $ HashMap.empty
 {-# NOINLINE messageMetaStore #-}
 
+defaultOutputWith
+  :: (BS.ByteString -> IO ())
+  -> Loc
+  -> LogSource
+  -> LogLevel
+  -> LogStr
+  -> IO ()
+defaultOutputWith f loc src level msg = do
+  now <- Time.getCurrentTime
+  threadIdText <- fmap (Text.pack . show) Concurrent.myThreadId
+  threadContext <- Context.mines messageMetaStore \hashMap ->
+    HashMap.toList $ HashMap.insert "tid" (String threadIdText) hashMap
+  f $ defaultLogStrBS now threadContext loc src level msg
+
 defaultLogStrBS
   :: UTCTime
   -> [Pair]
@@ -111,11 +131,21 @@ defaultLogStrBS
   -> LogSource
   -> LogLevel
   -> LogStr
-  -> ByteString
+  -> BS.ByteString
 defaultLogStrBS now threadContext loc logSource logLevel logStr =
   ByteString.Lazy.toStrict
-    $ Aeson.encodingToLazyByteString
-    $ logItemEncoding logItem
+    $ defaultLogStrLBS now threadContext loc logSource logLevel logStr
+
+defaultLogStrLBS
+  :: UTCTime
+  -> [Pair]
+  -> Loc
+  -> LogSource
+  -> LogLevel
+  -> LogStr
+  -> LBS.ByteString
+defaultLogStrLBS now threadContext loc logSource logLevel logStr =
+  Aeson.encodingToLazyByteString $ logItemEncoding logItem
   where
   logItem :: LogItem
   logItem =

@@ -27,6 +27,7 @@ module Control.Monad.Logger.CallStack.JSON
   , runStderrLoggingT
 
   , defaultOutput
+  , defaultLogStr
 
   , module Log
   ) where
@@ -57,26 +58,23 @@ import Control.Monad.Logger as Log hiding
   , defaultLogStr
   )
 
-import Control.Monad.Logger.CallStack.JSON.Internal (Message(..))
 import Control.Exception.Lifted (bracket)
 import Control.Monad.Base (MonadBase(liftBase))
 import Control.Monad.Catch (MonadMask)
 import Control.Monad.IO.Class (MonadIO)
+import Control.Monad.Logger.CallStack.JSON.Internal (Message(..))
 import Control.Monad.Trans.Control (MonadBaseControl(..))
-import Data.Aeson (Value(String))
 import Data.Aeson.Types (Pair)
+import Data.Time (UTCTime)
 import GHC.Stack (CallStack, HasCallStack, callStack)
 import System.IO
   ( BufferMode(LineBuffering), IOMode(AppendMode), Handle, hClose, hSetBuffering, openFile, stderr
   , stdout
   )
 import qualified Context
-import qualified Control.Concurrent as Concurrent
 import qualified Control.Monad.Logger.CallStack.JSON.Internal as Internal
 import qualified Data.ByteString.Char8 as ByteString.Char8
 import qualified Data.HashMap.Strict as HashMap
-import qualified Data.Text as Text
-import qualified Data.Time as Time
 
 -- | Logs a message with the location provided by an implicit 'CallStack'.
 --
@@ -197,10 +195,16 @@ defaultOutput
   -> LogLevel
   -> LogStr
   -> IO ()
-defaultOutput h loc src level msg = do
-  now <- Time.getCurrentTime
-  threadIdText <- fmap (Text.pack . show) Concurrent.myThreadId
-  threadContext <- Context.mines Internal.messageMetaStore \hashMap ->
-    HashMap.toList $ HashMap.insert "tid" (String threadIdText) hashMap
-  ByteString.Char8.hPutStrLn h
-    $ Internal.defaultLogStrBS now threadContext loc src level msg
+defaultOutput h = Internal.defaultOutputWith (ByteString.Char8.hPutStrLn h)
+
+defaultLogStr
+  :: UTCTime
+  -> [Pair]
+  -> Loc
+  -> LogSource
+  -> LogLevel
+  -> LogStr
+  -> LogStr
+defaultLogStr now threadContext loc logSource logLevel logStr =
+  toLogStr
+    $ Internal.defaultLogStrBS now threadContext loc logSource logLevel logStr
