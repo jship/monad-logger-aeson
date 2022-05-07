@@ -1,0 +1,284 @@
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE StrictData #-}
+module Control.Monad.Logger.CallStack.JSON.Internal
+  ( -- * Disclaimer
+    -- $disclaimer
+
+    -- ** Message-related
+    Message(..)
+  , messageMetaStore
+  , logCS
+  , defaultLogStrBS
+  , messageToLogStr
+  , messageEncoding
+  , messageSeries
+
+    -- ** Log item-related
+  , LogItem(..)
+  , logItemEncoding
+
+    -- ** Encoding-related
+  , xonCharLogStr
+  , xonChar
+  , pairsEncoding
+  , pairsSeries
+  , levelEncoding
+  , locEncoding
+
+    -- ** @monad-logger@ internals
+  , mkLoggerLoc
+  , locFromCS
+  , isDefaultLoc
+  ) where
+
+import Context (Store)
+import Control.Monad.Logger
+  ( Loc(..), LogLevel(..), MonadLogger(..), ToLogStr(..), LogSource, defaultLoc
+  )
+import Data.Aeson (KeyValue((.=)), Encoding, Value)
+import Data.Aeson.Encoding.Internal (Series(..))
+import Data.Aeson.Types (Pair)
+import Data.ByteString.Char8 (ByteString)
+import Data.HashMap.Strict (HashMap)
+import Data.String (IsString)
+import Data.Text (Text)
+import Data.Time (UTCTime)
+import GHC.Stack (SrcLoc(..), CallStack, getCallStack)
+import System.Log.FastLogger.Internal (LogStr(..))
+import qualified Context
+import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Encoding as Aeson
+import qualified Data.ByteString.Builder as ByteString.Builder
+import qualified Data.ByteString.Lazy as ByteString.Lazy
+import qualified Data.ByteString.Lazy.Char8 as ByteString.Lazy.Char8
+import qualified Data.Char as Char
+import qualified Data.HashMap.Strict as HashMap
+import qualified Data.String as String
+import qualified Data.Text as Text
+import qualified Data.Text.Encoding as Text.Encoding
+import qualified Data.Text.Encoding.Error as Text.Encoding.Error
+import qualified System.IO.Unsafe as IO.Unsafe
+
+#if MIN_VERSION_aeson(2, 0, 0)
+import Data.Aeson.Key (Key)
+#else
+type Key = Text
+#endif
+
+-- | A 'Message' captures a textual component and a metadata component. The
+-- metadata component is a list of 'Pair' to support tacking on arbitrary
+-- structured data to a log message.
+--
+-- With the @OverloadedStrings@ extension enabled, 'Message' values can be
+-- constructed without metadata fairly conveniently, just as if we were using
+-- 'Text' directly:
+--
+-- > logDebug "Some log message without metadata"
+--
+-- Metadata may be included in a 'Message' via the ':#' constructor:
+--
+-- > logDebug $ "Some log message with metadata" :#
+-- >   [ "bloorp" .= (42 :: Int)
+-- >   , "bonk" .= ("abc" :: Text)
+-- >   ]
+--
+-- The mneomic for the ':#' constructor is that the @#@ symbol is sometimes
+-- referred to as a hash, a JSON object can be thought of as a hash map, and
+-- so with @:#@ (and enough squinting), we are @cons@-ing a textual message onto
+-- a JSON object. Yes, this mnemonic isn't well-typed, but hopefully it still
+-- helps!
+data Message = Text :# [Pair]
+infixr 5 :#
+
+instance IsString Message where
+  fromString string = Text.pack string :# []
+
+messageMetaStore :: Store (HashMap Key Value)
+messageMetaStore =
+  IO.Unsafe.unsafePerformIO
+    $ Context.newStore Context.noPropagation
+    $ Just
+    $ HashMap.empty
+{-# NOINLINE messageMetaStore #-}
+
+defaultLogStrBS
+  :: UTCTime
+  -> [Pair]
+  -> Loc
+  -> LogSource
+  -> LogLevel
+  -> LogStr
+  -> ByteString
+defaultLogStrBS now threadContext loc logSource logLevel logStr =
+  ByteString.Lazy.toStrict
+    $ Aeson.encodingToLazyByteString
+    $ logItemEncoding logItem
+  where
+  logItem :: LogItem
+  logItem =
+    case ByteString.Lazy.Char8.uncons logStrLBS of
+      Nothing ->
+        mkLogItem
+          $ messageEncoding
+          $ Text.empty :# []
+      Just (c, lbs) ->
+        -- If the first character of the log string is a XON byte, then we
+        -- assume the log string (minus the XON byte) is an encoded 'Message'.
+        if c == xonChar then
+          mkLogItem
+            $ Aeson.unsafeToEncoding
+            $ ByteString.Builder.lazyByteString lbs
+        -- Otherwise, we make no assumptions of the log string. We simply decode
+        -- to text and use this text in a metadata-less 'Message'.
+        else
+          mkLogItem
+            $ messageEncoding
+            $ decodeLenient logStrLBS :# []
+
+  mkLogItem :: Encoding -> LogItem
+  mkLogItem messageEnc =
+    LogItem
+      { logItemTimestamp = now
+      , logItemLoc = loc
+      , logItemLogSource = logSource
+      , logItemLevel = logLevel
+      , logItemThreadContext = threadContext
+      , logItemMessageEncoding = messageEnc
+      }
+
+  decodeLenient =
+    Text.Encoding.decodeUtf8With Text.Encoding.Error.lenientDecode
+      . ByteString.Lazy.toStrict
+
+  logStrLBS = ByteString.Builder.toLazyByteString logStrBuilder
+  LogStr _ logStrBuilder = logStr
+
+-- | Sneakiness ensues.
+logCS
+  :: (MonadLogger m)
+  => CallStack
+  -> LogSource
+  -> LogLevel
+  -> Message
+  -> m ()
+logCS cs src lvl msg =
+  monadLoggerLog (locFromCS cs) src lvl $ xonCharLogStr <> messageToLogStr msg
+
+xonCharLogStr :: LogStr
+xonCharLogStr = toLogStr $ ByteString.Lazy.Char8.singleton $ xonChar
+
+xonChar :: Char
+xonChar = Char.chr 17
+
+data LogItem = LogItem
+  { logItemTimestamp :: UTCTime
+  , logItemLoc :: Loc
+  , logItemLogSource :: LogSource
+  , logItemLevel :: LogLevel
+  , logItemThreadContext :: [Pair]
+  , logItemMessageEncoding :: Encoding
+  }
+
+logItemEncoding :: LogItem -> Encoding
+logItemEncoding logItem =
+  Aeson.pairs $
+    (Aeson.pairStr "time" $ Aeson.toEncoding logItemTimestamp)
+      <> (Aeson.pairStr "level" $ levelEncoding logItemLevel)
+      <> ( if isDefaultLoc logItemLoc then
+             mempty
+           else
+             Aeson.pairStr "location" $ locEncoding logItemLoc
+         )
+      <> ( if Text.null logItemLogSource then
+             mempty
+           else
+             Aeson.pairStr "source" $ Aeson.toEncoding logItemLogSource
+         )
+      <> ( if null logItemThreadContext then
+             mempty
+           else
+             Aeson.pairStr "context" $ pairsEncoding logItemThreadContext
+         )
+      <> (Aeson.pairStr "message" logItemMessageEncoding)
+  where
+  LogItem
+    { logItemTimestamp
+    , logItemLoc
+    , logItemLogSource
+    , logItemLevel
+    , logItemThreadContext
+    , logItemMessageEncoding
+    } = logItem
+
+messageToLogStr :: Message -> LogStr
+messageToLogStr = toLogStr . Aeson.encodingToLazyByteString . messageEncoding
+
+messageEncoding :: Message -> Encoding
+messageEncoding  = Aeson.pairs . messageSeries
+
+messageSeries :: Message -> Series
+messageSeries message =
+  "text" .= messageText
+    <> ( if null messageMeta then
+           mempty
+         else
+           Aeson.pairStr "meta" $ pairsEncoding messageMeta
+       )
+  where
+  messageText :# messageMeta = message
+
+pairsEncoding :: [Pair] -> Encoding
+pairsEncoding = Aeson.pairs . pairsSeries
+
+pairsSeries :: [Pair] -> Series
+pairsSeries = mconcat . fmap (uncurry (.=))
+
+levelEncoding :: LogLevel -> Encoding
+levelEncoding = Aeson.text . \case
+  LevelDebug -> "debug"
+  LevelInfo -> "info"
+  LevelWarn -> "warn"
+  LevelError -> "error"
+  LevelOther t -> t
+
+locEncoding :: Loc -> Encoding
+locEncoding loc =
+  Aeson.pairs $
+    (Aeson.pairStr "package" $ Aeson.string loc_package)
+      <> (Aeson.pairStr "module" $ Aeson.string loc_module)
+      <> (Aeson.pairStr "file" $ Aeson.string loc_filename)
+      <> (Aeson.pairStr "line" $ Aeson.int $ fst loc_start)
+      <> (Aeson.pairStr "char" $ Aeson.int $ snd loc_start)
+  where
+  Loc { loc_filename, loc_package, loc_module, loc_start } = loc
+
+-- | Not exported from 'monad-logger', so copied here.
+mkLoggerLoc :: SrcLoc -> Loc
+mkLoggerLoc loc =
+  Loc { loc_filename = srcLocFile loc
+      , loc_package  = srcLocPackage loc
+      , loc_module   = srcLocModule loc
+      , loc_start    = ( srcLocStartLine loc
+                       , srcLocStartCol loc)
+      , loc_end      = ( srcLocEndLine loc
+                       , srcLocEndCol loc)
+      }
+
+-- | Not exported from 'monad-logger', so copied here.
+locFromCS :: CallStack -> Loc
+locFromCS cs = case getCallStack cs of
+                 ((_, loc):_) -> mkLoggerLoc loc
+                 _            -> defaultLoc
+
+-- | Not exported from 'monad-logger', so copied here.
+isDefaultLoc :: Loc -> Bool
+isDefaultLoc (Loc "<unknown>" "<unknown>" "<unknown>" (0,0) (0,0)) = True
+isDefaultLoc _ = False
+
+-- $disclaimer
+--
+-- In general, changes to this module will not be reflected in the library's
+-- version updates. Direct use of this module should be done with care.

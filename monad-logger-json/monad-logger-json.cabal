@@ -19,6 +19,7 @@ extra-source-files:
 library
   exposed-modules:
       Control.Monad.Logger.CallStack.JSON
+      Control.Monad.Logger.CallStack.JSON.Internal
   other-modules:
       Paths_monad_logger_json
   hs-source-dirs:
