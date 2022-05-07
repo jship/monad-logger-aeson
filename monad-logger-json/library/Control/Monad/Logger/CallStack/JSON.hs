@@ -22,10 +22,12 @@ module Control.Monad.Logger.CallStack.JSON
 
   , withThreadContext
 
+  , runFastLoggingT
   , runFileLoggingT
   , runStdoutLoggingT
   , runStderrLoggingT
 
+  , fastLoggerOutput
   , defaultOutput
   , defaultLogStr
 
@@ -71,10 +73,12 @@ import System.IO
   ( BufferMode(LineBuffering), IOMode(AppendMode), Handle, hClose, hSetBuffering, openFile, stderr
   , stdout
   )
+import System.Log.FastLogger (LoggerSet)
 import qualified Context
 import qualified Control.Monad.Logger.CallStack.JSON.Internal as Internal
-import qualified Data.ByteString.Char8 as ByteString.Char8
+import qualified Data.ByteString.Char8 as BS8
 import qualified Data.HashMap.Strict as HashMap
+import qualified System.Log.FastLogger as FastLogger
 
 -- | Logs a message with the location provided by an implicit 'CallStack'.
 --
@@ -109,31 +113,31 @@ logOther = logOtherCS callStack
 -- | Logs a message with location given by 'CallStack'.
 --
 -- @since 0.1.0.0
-logDebugCS :: MonadLogger m => CallStack -> Message -> m ()
+logDebugCS :: (MonadLogger m) => CallStack -> Message -> m ()
 logDebugCS cs msg = Internal.logCS cs "" LevelDebug msg
 
 -- | See 'logDebugCS'
 --
 -- @since 0.1.0.0
-logInfoCS :: MonadLogger m => CallStack -> Message -> m ()
+logInfoCS :: (MonadLogger m) => CallStack -> Message -> m ()
 logInfoCS cs msg = Internal.logCS cs "" LevelInfo msg
 
 -- | See 'logDebugCS'
 --
 -- @since 0.1.0.0
-logWarnCS :: MonadLogger m => CallStack -> Message -> m ()
+logWarnCS :: (MonadLogger m) => CallStack -> Message -> m ()
 logWarnCS cs msg = Internal.logCS cs "" LevelWarn msg
 
 -- | See 'logDebugCS'
 --
 -- @since 0.1.0.0
-logOtherCS :: MonadLogger m => CallStack -> LogLevel -> Message -> m ()
+logOtherCS :: (MonadLogger m) => CallStack -> LogLevel -> Message -> m ()
 logOtherCS cs lvl msg = Internal.logCS cs "" lvl msg
 
 -- | See 'logDebugCS'
 --
 -- @since 0.1.0.0
-logErrorCS :: MonadLogger m => CallStack -> Message -> m ()
+logErrorCS :: (MonadLogger m) => CallStack -> Message -> m ()
 logErrorCS cs msg = Internal.logCS cs "" LevelError msg
 
 -- | Note that the @monad-logger@ version does not log location info. This
@@ -167,26 +171,43 @@ withThreadContext pairs =
     HashMap.union (HashMap.fromList pairs) pairsMap
 
 -- | Run a block using a @MonadLogger@ instance which appends to the specified
+-- 'LoggerSet'.
+--
+-- @since 0.1.0.0
+runFastLoggingT :: LoggerSet -> LoggingT m a -> m a
+runFastLoggingT loggerSet = flip runLoggingT (fastLoggerOutput loggerSet)
+
+-- | Run a block using a @MonadLogger@ instance which appends to the specified
 -- file.
 --
 -- @since 0.1.0.0
 runFileLoggingT :: (MonadBaseControl IO m) => FilePath -> LoggingT m a -> m a
-runFileLoggingT fp logt =
-  bracket (liftBase $ openFile fp AppendMode) (liftBase . hClose) \h -> do
+runFileLoggingT filePath action =
+  bracket (liftBase $ openFile filePath AppendMode) (liftBase . hClose) \h -> do
     liftBase $ hSetBuffering h LineBuffering
-    runLoggingT logt $ defaultOutput h
+    runLoggingT action $ defaultOutput h
 
 -- | Run a block using a @MonadLogger@ instance which prints to stderr.
 --
 -- @since 0.1.0.0
 runStderrLoggingT :: LoggingT m a -> m a
-runStderrLoggingT = (`runLoggingT` defaultOutput stderr)
+runStderrLoggingT = flip runLoggingT (defaultOutput stderr)
 
 -- | Run a block using a @MonadLogger@ instance which prints to stdout.
 --
 -- @since 0.1.0.0
 runStdoutLoggingT :: LoggingT m a -> m a
-runStdoutLoggingT = (`runLoggingT` defaultOutput stdout)
+runStdoutLoggingT = flip runLoggingT (defaultOutput stdout)
+
+fastLoggerOutput
+  :: LoggerSet
+  -> Loc
+  -> LogSource
+  -> LogLevel
+  -> LogStr
+  -> IO ()
+fastLoggerOutput loggerSet =
+  Internal.defaultOutputWith (FastLogger.pushLogStrLn loggerSet . toLogStr)
 
 defaultOutput
   :: Handle
@@ -195,7 +216,7 @@ defaultOutput
   -> LogLevel
   -> LogStr
   -> IO ()
-defaultOutput h = Internal.defaultOutputWith (ByteString.Char8.hPutStrLn h)
+defaultOutput handle = Internal.defaultOutputWith (BS8.hPutStrLn handle)
 
 defaultLogStr
   :: UTCTime

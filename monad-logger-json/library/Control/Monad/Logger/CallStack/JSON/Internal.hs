@@ -54,11 +54,10 @@ import qualified Context
 import qualified Control.Concurrent as Concurrent
 import qualified Data.Aeson as Aeson
 import qualified Data.Aeson.Encoding as Aeson
-import qualified Data.ByteString.Builder as ByteString.Builder
-import qualified Data.ByteString.Char8 as BS
-import qualified Data.ByteString.Lazy as ByteString.Lazy
-import qualified Data.ByteString.Lazy.Char8 as ByteString.Lazy.Char8
-import qualified Data.ByteString.Lazy.Char8 as LBS
+import qualified Data.ByteString.Builder as Builder
+import qualified Data.ByteString.Char8 as BS8
+import qualified Data.ByteString.Lazy as LBS
+import qualified Data.ByteString.Lazy.Char8 as LBS8
 import qualified Data.Char as Char
 import qualified Data.HashMap.Strict as HashMap
 import qualified Data.String as String
@@ -111,7 +110,7 @@ messageMetaStore =
 {-# NOINLINE messageMetaStore #-}
 
 defaultOutputWith
-  :: (BS.ByteString -> IO ())
+  :: (BS8.ByteString -> IO ())
   -> Loc
   -> LogSource
   -> LogLevel
@@ -131,9 +130,9 @@ defaultLogStrBS
   -> LogSource
   -> LogLevel
   -> LogStr
-  -> BS.ByteString
+  -> BS8.ByteString
 defaultLogStrBS now threadContext loc logSource logLevel logStr =
-  ByteString.Lazy.toStrict
+  LBS.toStrict
     $ defaultLogStrLBS now threadContext loc logSource logLevel logStr
 
 defaultLogStrLBS
@@ -143,13 +142,13 @@ defaultLogStrLBS
   -> LogSource
   -> LogLevel
   -> LogStr
-  -> LBS.ByteString
+  -> LBS8.ByteString
 defaultLogStrLBS now threadContext loc logSource logLevel logStr =
   Aeson.encodingToLazyByteString $ logItemEncoding logItem
   where
   logItem :: LogItem
   logItem =
-    case ByteString.Lazy.Char8.uncons logStrLBS of
+    case LBS8.uncons logStrLBS of
       Nothing ->
         mkLogItem
           $ messageEncoding
@@ -160,7 +159,7 @@ defaultLogStrLBS now threadContext loc logSource logLevel logStr =
         if c == xonChar then
           mkLogItem
             $ Aeson.unsafeToEncoding
-            $ ByteString.Builder.lazyByteString lbs
+            $ Builder.lazyByteString lbs
         -- Otherwise, we make no assumptions of the log string. We simply decode
         -- to text and use this text in a metadata-less 'Message'.
         else
@@ -181,9 +180,9 @@ defaultLogStrLBS now threadContext loc logSource logLevel logStr =
 
   decodeLenient =
     Text.Encoding.decodeUtf8With Text.Encoding.Error.lenientDecode
-      . ByteString.Lazy.toStrict
+      . LBS.toStrict
 
-  logStrLBS = ByteString.Builder.toLazyByteString logStrBuilder
+  logStrLBS = Builder.toLazyByteString logStrBuilder
   LogStr _ logStrBuilder = logStr
 
 -- | Sneakiness ensues.
@@ -198,7 +197,7 @@ logCS cs src lvl msg =
   monadLoggerLog (locFromCS cs) src lvl $ xonCharLogStr <> messageToLogStr msg
 
 xonCharLogStr :: LogStr
-xonCharLogStr = toLogStr $ ByteString.Lazy.Char8.singleton $ xonChar
+xonCharLogStr = toLogStr $ LBS8.singleton $ xonChar
 
 xonChar :: Char
 xonChar = Char.chr 17
