@@ -10,7 +10,7 @@ import Data.Aeson ((.=))
 import Data.Text (Text)
 import qualified Control.Monad.Logger.CallStack as Log
 
--- $ stack run monad-logger-json | jq
+-- $ stack run monad-logger-aeson | jq
 -- {
 --   "time": "2022-05-07T20:03:54.0101865Z",
 --   "level": "info",
@@ -41,7 +41,7 @@ import qualified Control.Monad.Logger.CallStack as Log
 --   "location": {
 --     "package": "main",
 --     "module": "Main",
---     "file": "app/monad-logger-json.hs",
+--     "file": "app/monad-logger-aeson.hs",
 --     "line": 144,
 --     "char": 13
 --   },
@@ -60,7 +60,7 @@ import qualified Control.Monad.Logger.CallStack as Log
 --   "location": {
 --     "package": "main",
 --     "module": "Main",
---     "file": "app/monad-logger-json.hs",
+--     "file": "app/monad-logger-aeson.hs",
 --     "line": 147,
 --     "char": 13
 --   },
@@ -79,7 +79,7 @@ import qualified Control.Monad.Logger.CallStack as Log
 --   "location": {
 --     "package": "main",
 --     "module": "Main",
---     "file": "app/monad-logger-json.hs",
+--     "file": "app/monad-logger-aeson.hs",
 --     "line": 148,
 --     "char": 13
 --   },
@@ -102,7 +102,7 @@ import qualified Control.Monad.Logger.CallStack as Log
 --   "location": {
 --     "package": "main",
 --     "module": "Main",
---     "file": "app/monad-logger-json.hs",
+--     "file": "app/monad-logger-aeson.hs",
 --     "line": 152,
 --     "char": 13
 --   },

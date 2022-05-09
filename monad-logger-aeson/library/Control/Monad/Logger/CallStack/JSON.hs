@@ -148,27 +148,27 @@ logErrorCS :: (MonadLogger m) => CallStack -> Message -> m ()
 logErrorCS cs msg = Internal.logCS cs "" LevelError msg
 
 -- | Note that the @monad-logger@ version does not log location info. This
--- @monad-logger-json@ version logs location info via call stack.
+-- @monad-logger-aeson@ version logs location info via call stack.
 logDebugNS :: (HasCallStack, MonadLogger m) => LogSource -> Message -> m ()
 logDebugNS src = Internal.logCS callStack src LevelDebug
 
 -- | Note that the @monad-logger@ version does not log location info. This
--- @monad-logger-json@ version logs location info via call stack.
+-- @monad-logger-aeson@ version logs location info via call stack.
 logInfoNS :: (HasCallStack, MonadLogger m) => LogSource -> Message -> m ()
 logInfoNS src = Internal.logCS callStack src LevelInfo
 
 -- | Note that the @monad-logger@ version does not log location info. This
--- @monad-logger-json@ version logs location info via call stack.
+-- @monad-logger-aeson@ version logs location info via call stack.
 logWarnNS :: (HasCallStack, MonadLogger m) => LogSource -> Message -> m ()
 logWarnNS src = Internal.logCS callStack src LevelWarn
 
 -- | Note that the @monad-logger@ version does not log location info. This
--- @monad-logger-json@ version logs location info via call stack.
+-- @monad-logger-aeson@ version logs location info via call stack.
 logErrorNS :: (HasCallStack, MonadLogger m) => LogSource -> Message -> m ()
 logErrorNS src = Internal.logCS callStack src LevelError
 
 -- | Note that the @monad-logger@ version does not log location info. This
--- @monad-logger-json@ version logs location info via call stack.
+-- @monad-logger-aeson@ version logs location info via call stack.
 logOtherNS :: (HasCallStack, MonadLogger m) => LogSource -> LogLevel -> Message -> m ()
 logOtherNS = Internal.logCS callStack
 

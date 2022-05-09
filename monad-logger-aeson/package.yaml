@@ -1,10 +1,10 @@
-name: monad-logger-json
+name: monad-logger-aeson
 version: '0.0.0.0'
 copyright: 2022 (c) Jason Shipman
 author: "Jason Shipman"
 maintainer: "Jason Shipman"
-synopsis: monad-logger-json synopsis
-description: monad-logger-json description
+synopsis: monad-logger-aeson synopsis
+description: monad-logger-aeson description
 category: System
 
 extra-source-files:
@@ -34,7 +34,7 @@ library:
   source-dirs: library
 
 tests:
-  monad-logger-json-test-suite:
+  monad-logger-aeson-test-suite:
     source-dirs: test-suite
     main: Driver.hs
     build-tools:
@@ -42,15 +42,15 @@ tests:
     dependencies:
     - base
     - hspec
-    - monad-logger-json
+    - monad-logger-aeson
 
 executables:
-  monad-logger-json:
+  monad-logger-aeson:
     source-dirs: app
-    main: monad-logger-json.hs
+    main: monad-logger-aeson.hs
     dependencies:
     - aeson
     - base
     - monad-logger
-    - monad-logger-json
+    - monad-logger-aeson
     - text
