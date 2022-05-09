@@ -10,8 +10,8 @@ jobs:
       matrix:
         os: [ubuntu-latest, macOS-latest]
         resolver:
-        - nightly-2022-04-28  # ghc-9.2.2
-        - lts-19.5  # ghc-9.0.2
+        - nightly-2022-05-05  # ghc-9.2.2
+        - lts-19.6  # ghc-9.0.2
         - lts-18.28  # ghc-8.10.7
     env:
       RESOLVER: ${{ matrix.resolver }}
@@ -30,10 +30,10 @@ jobs:
         key: ${{ runner.os }}-${{ matrix.resolver }}
         restore-keys: ${{ runner.os }}-
     - name: Install GHC
-      run: stack --resolver="$RESOLVER" --no-terminal setup
+      run: stack --stack-yaml="stack-${RESOLVER}.yaml" --no-terminal setup
     - name: Build Dependencies
-      run: stack --resolver="$RESOLVER" --no-terminal build --only-dependencies
+      run: stack --stack-yaml="stack-${RESOLVER}.yaml" --no-terminal build --only-dependencies
     - name: Build
-      run: stack --resolver="$RESOLVER" --no-terminal build --pedantic --test --no-run-tests --bench --no-run-benchmarks --haddock --no-haddock-deps
+      run: stack --stack-yaml="stack-${RESOLVER}.yaml" --no-terminal build --pedantic --test --no-run-tests --bench --no-run-benchmarks --haddock --no-haddock-deps
     - name: Test
-      run: stack --resolver="$RESOLVER" --no-terminal build --pedantic --test
+      run: stack --stack-yaml="stack-${RESOLVER}.yaml" --no-terminal build --pedantic --test
