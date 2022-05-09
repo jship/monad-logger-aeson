@@ -16,7 +16,6 @@ module Control.Monad.Logger.CallStack.JSON.Internal
   , LoggedMessage(..)
   , messageMetaStore
   , logCS
-  , defaultOutputWith
   , defaultLogStrBS
   , defaultLogStrLBS
   , messageToLogStr
@@ -48,7 +47,7 @@ import Context (Store)
 import Control.Monad.Logger
   ( Loc(..), LogLevel(..), MonadLogger(..), ToLogStr(..), LogSource, LoggingT
   )
-import Data.Aeson (KeyValue((.=)), Value(String), (.:), (.:?), Encoding, FromJSON, ToJSON)
+import Data.Aeson (KeyValue((.=)), Value, (.:), (.:?), Encoding, FromJSON, ToJSON)
 import Data.Aeson.Encoding.Internal (Series(..))
 import Data.Aeson.Types (Pair, Parser)
 import Data.HashMap.Strict (HashMap)
@@ -59,7 +58,6 @@ import GHC.Generics (Generic)
 import GHC.Stack (SrcLoc(..), CallStack, getCallStack)
 import System.Log.FastLogger.Internal (LogStr(..))
 import qualified Context
-import qualified Control.Concurrent as Concurrent
 import qualified Control.Monad.Logger as Logger
 import qualified Data.Aeson as Aeson
 import qualified Data.Aeson.Encoding as Aeson
@@ -74,7 +72,6 @@ import qualified Data.String as String
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text.Encoding
 import qualified Data.Text.Encoding.Error as Text.Encoding.Error
-import qualified Data.Time as Time
 import qualified System.IO.Unsafe as IO.Unsafe
 
 #if MIN_VERSION_aeson(2, 0, 0)
@@ -242,20 +239,6 @@ messageMetaStore =
     $ Just
     $ HashMap.empty
 {-# NOINLINE messageMetaStore #-}
-
-defaultOutputWith
-  :: (LogLevel -> BS8.ByteString -> IO ())
-  -> Loc
-  -> LogSource
-  -> LogLevel
-  -> LogStr
-  -> IO ()
-defaultOutputWith f loc src level msg = do
-  now <- Time.getCurrentTime
-  threadIdText <- fmap (Text.pack . show) Concurrent.myThreadId
-  threadContext <- Context.mines messageMetaStore \hashMap ->
-    HashMap.toList $ HashMap.insert "tid" (String threadIdText) hashMap
-  f level $ defaultLogStrBS now threadContext loc src level msg
 
 defaultLogStrBS
   :: UTCTime

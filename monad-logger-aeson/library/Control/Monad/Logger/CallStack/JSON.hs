@@ -31,6 +31,7 @@ module Control.Monad.Logger.CallStack.JSON
   , runFastLoggingT
 
   , defaultOutput
+  , defaultOutputWith
   , handleOutput
   , fastLoggerOutput
   , defaultLogStr
@@ -72,7 +73,7 @@ import Control.Monad.Catch (MonadMask)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Logger.CallStack.JSON.Internal (LoggedMessage(..), Message(..))
 import Control.Monad.Trans.Control (MonadBaseControl(..))
-import Data.Aeson.Types (Pair)
+import Data.Aeson.Types (Value(String), Pair)
 import Data.Text (Text)
 import Data.Time (UTCTime)
 import GHC.Stack (CallStack, HasCallStack, callStack)
@@ -82,9 +83,12 @@ import System.IO
   )
 import System.Log.FastLogger (LoggerSet)
 import qualified Context
+import qualified Control.Concurrent as Concurrent
 import qualified Control.Monad.Logger.CallStack.JSON.Internal as Internal
 import qualified Data.ByteString.Char8 as BS8
 import qualified Data.HashMap.Strict as HashMap
+import qualified Data.Text as Text
+import qualified Data.Time as Time
 import qualified System.Log.FastLogger as FastLogger
 
 -- | Logs a message with the location provided by an implicit 'CallStack'.
@@ -226,6 +230,20 @@ defaultOutput
   -> IO ()
 defaultOutput handle = handleOutput (const handle)
 
+defaultOutputWith
+  :: (LogLevel -> BS8.ByteString -> IO ())
+  -> Loc
+  -> LogSource
+  -> LogLevel
+  -> LogStr
+  -> IO ()
+defaultOutputWith f loc src level msg = do
+  now <- Time.getCurrentTime
+  threadIdText <- fmap (Text.pack . show) Concurrent.myThreadId
+  threadContext <- Context.mines Internal.messageMetaStore \hashMap ->
+    HashMap.toList $ HashMap.insert "tid" (String threadIdText) hashMap
+  f level $ Internal.defaultLogStrBS now threadContext loc src level msg
+
 handleOutput
   :: (LogLevel -> Handle)
   -> Loc
@@ -234,7 +252,7 @@ handleOutput
   -> LogStr
   -> IO ()
 handleOutput levelToHandle =
-  Internal.defaultOutputWith \logLevel bytes -> do
+  defaultOutputWith \logLevel bytes -> do
     BS8.hPutStrLn (levelToHandle logLevel) bytes
 
 fastLoggerOutput
@@ -245,7 +263,7 @@ fastLoggerOutput
   -> LogStr
   -> IO ()
 fastLoggerOutput loggerSet =
-  Internal.defaultOutputWith \_logLevel bytes -> do
+  defaultOutputWith \_logLevel bytes -> do
     FastLogger.pushLogStrLn loggerSet $ toLogStr bytes
 
 defaultLogStr
