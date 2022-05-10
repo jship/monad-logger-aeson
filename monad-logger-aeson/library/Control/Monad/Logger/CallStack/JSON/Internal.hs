@@ -220,7 +220,7 @@ instance ToJSON LoggedMessage where
 -- >   , "bonk" .= ("abc" :: Text)
 -- >   ]
 --
--- The mneomic for the ':#' constructor is that the @#@ symbol is sometimes
+-- The mnemonic for the ':#' constructor is that the @#@ symbol is sometimes
 -- referred to as a hash, a JSON object can be thought of as a hash map, and
 -- so with @:#@ (and enough squinting), we are @cons@-ing a textual message onto
 -- a JSON object. Yes, this mnemonic isn't well-typed, but hopefully it still

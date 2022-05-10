@@ -231,18 +231,25 @@ defaultOutput
 defaultOutput handle = handleOutput (const handle)
 
 defaultOutputWith
-  :: (LogLevel -> BS8.ByteString -> IO ())
+  :: [Pair]
+  -> (LogLevel -> BS8.ByteString -> IO ())
   -> Loc
   -> LogSource
   -> LogLevel
   -> LogStr
   -> IO ()
-defaultOutputWith f loc src level msg = do
+defaultOutputWith baseThreadContext output location logSource logLevel msg = do
   now <- Time.getCurrentTime
   threadIdText <- fmap (Text.pack . show) Concurrent.myThreadId
   threadContext <- Context.mines Internal.messageMetaStore \hashMap ->
-    HashMap.toList $ HashMap.insert "tid" (String threadIdText) hashMap
-  f level $ Internal.defaultLogStrBS now threadContext loc src level msg
+    HashMap.toList
+      $ HashMap.insert "tid" (String threadIdText)
+      $ HashMap.union hashMap
+      $ baseThreadContextHashMap
+  output logLevel
+    $ Internal.defaultLogStrBS now threadContext location logSource logLevel msg
+  where
+  baseThreadContextHashMap = HashMap.fromList baseThreadContext
 
 handleOutput
   :: (LogLevel -> Handle)
@@ -252,7 +259,7 @@ handleOutput
   -> LogStr
   -> IO ()
 handleOutput levelToHandle =
-  defaultOutputWith \logLevel bytes -> do
+  defaultOutputWith [] \logLevel bytes -> do
     BS8.hPutStrLn (levelToHandle logLevel) bytes
 
 fastLoggerOutput
@@ -263,7 +270,7 @@ fastLoggerOutput
   -> LogStr
   -> IO ()
 fastLoggerOutput loggerSet =
-  defaultOutputWith \_logLevel bytes -> do
+  defaultOutputWith [] \_logLevel bytes -> do
     FastLogger.pushLogStrLn loggerSet $ toLogStr bytes
 
 defaultLogStr
