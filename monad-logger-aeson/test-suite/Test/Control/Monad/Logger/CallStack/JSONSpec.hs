@@ -17,6 +17,7 @@ import Test.Hspec (Expectation, Spec, describe, expectationFailure, it, shouldBe
 import qualified Data.Aeson as Aeson
 import qualified Data.Aeson.Diff as Diff
 import qualified Data.ByteString.Char8 as BS8
+import qualified Data.List as List
 import qualified Data.Maybe as Maybe
 import qualified Data.Time as Time
 import qualified System.IO as IO
@@ -38,7 +39,7 @@ spec = do
                     "package": "main",
                     "module": "Test.Control.Monad.Logger.CallStack.JSONSpec",
                     "file": "test-suite/Test/Control/Monad/Logger/CallStack/JSONSpec.hs",
-                    "line": 31,
+                    "line": 32,
                     "char": 31
                   },
                   "context": {
@@ -69,7 +70,7 @@ spec = do
                       { loc_package = "main"
                       , loc_module = "Test.Control.Monad.Logger.CallStack.JSONSpec"
                       , loc_filename = "test-suite/Test/Control/Monad/Logger/CallStack/JSONSpec.hs"
-                      , loc_start = (31, 31)
+                      , loc_start = (32, 31)
                       , loc_end = (0, 0)
                       }
                 , loggedMessageLogSource = Nothing
@@ -92,7 +93,7 @@ spec = do
                     "package": "main",
                     "module": "Test.Control.Monad.Logger.CallStack.JSONSpec",
                     "file": "test-suite/Test/Control/Monad/Logger/CallStack/JSONSpec.hs",
-                    "line": 85,
+                    "line": 86,
                     "char": 17
                   },
                   "context": {
@@ -124,7 +125,7 @@ spec = do
                       { loc_package = "main"
                       , loc_module = "Test.Control.Monad.Logger.CallStack.JSONSpec"
                       , loc_filename = "test-suite/Test/Control/Monad/Logger/CallStack/JSONSpec.hs"
-                      , loc_start = (85, 17)
+                      , loc_start = (86, 17)
                       , loc_end = (0, 0)
                       }
                 , loggedMessageLogSource = Nothing
@@ -151,7 +152,7 @@ spec = do
                     "package": "main",
                     "module": "Test.Control.Monad.Logger.CallStack.JSONSpec",
                     "file": "test-suite/Test/Control/Monad/Logger/CallStack/JSONSpec.hs",
-                    "line": 141,
+                    "line": 142,
                     "char": 31
                   },
                   "context": {
@@ -186,7 +187,7 @@ spec = do
                       { loc_package = "main"
                       , loc_module = "Test.Control.Monad.Logger.CallStack.JSONSpec"
                       , loc_filename = "test-suite/Test/Control/Monad/Logger/CallStack/JSONSpec.hs"
-                      , loc_start = (141, 31)
+                      , loc_start = (142, 31)
                       , loc_end = (0, 0)
                       }
                 , loggedMessageLogSource = Nothing
@@ -215,7 +216,7 @@ spec = do
                     "package": "main",
                     "module": "Test.Control.Monad.Logger.CallStack.JSONSpec",
                     "file": "test-suite/Test/Control/Monad/Logger/CallStack/JSONSpec.hs",
-                    "line": 205,
+                    "line": 206,
                     "char": 17
                   },
                   "context": {
@@ -251,7 +252,7 @@ spec = do
                       { loc_package = "main"
                       , loc_module = "Test.Control.Monad.Logger.CallStack.JSONSpec"
                       , loc_filename = "test-suite/Test/Control/Monad/Logger/CallStack/JSONSpec.hs"
-                      , loc_start = (205, 17)
+                      , loc_start = (206, 17)
                       , loc_end = (0, 0)
                       }
                 , loggedMessageLogSource = Nothing
@@ -292,7 +293,7 @@ runTest testCase = do
               Error errStr -> do
                 expectationFailure $ "LoggedMessage parse failed: " <> errStr
               Success actualLoggedMessage -> do
-                actualLoggedMessage `shouldBe` expectedLoggedMessage
+                actualLoggedMessage `shouldMatchLoggedMessage` expectedLoggedMessage
       values -> do
         expectationFailure $ "Parsed too many logged values: " <> show values
   where
@@ -306,3 +307,19 @@ runTest testCase = do
 shouldMatchWithPatch :: (HasCallStack) => Value -> (Value, Patch) -> Expectation
 shouldMatchWithPatch actualValue (expectedValue, expectedPatch) = do
   Diff.diff actualValue expectedValue `shouldBe` expectedPatch
+
+shouldMatchLoggedMessage
+  :: (HasCallStack)
+  => LoggedMessage
+  -> LoggedMessage
+  -> Expectation
+shouldMatchLoggedMessage x y =
+  sortPairs x `shouldBe` sortPairs y
+  where
+  sortPairs lm =
+    lm
+      { loggedMessageThreadContext = List.sort $ loggedMessageThreadContext lm
+      , loggedMessageMessage =
+          case loggedMessageMessage lm of
+            messageText :# messageMeta -> messageText :# List.sort messageMeta
+      }
