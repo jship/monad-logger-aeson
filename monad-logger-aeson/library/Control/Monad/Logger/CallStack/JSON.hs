@@ -67,12 +67,9 @@ import Control.Monad.Logger as Log hiding
   , defaultLogStr
   )
 
-import Control.Exception.Lifted (bracket)
-import Control.Monad.Base (MonadBase(liftBase))
 import Control.Monad.Catch (MonadMask)
-import Control.Monad.IO.Class (MonadIO)
+import Control.Monad.IO.Class (MonadIO(liftIO))
 import Control.Monad.Logger.CallStack.JSON.Internal (LoggedMessage(..), Message(..))
-import Control.Monad.Trans.Control (MonadBaseControl(..))
 import Data.Aeson.Types (Value(String), Pair)
 import Data.Text (Text)
 import Data.Time (UTCTime)
@@ -84,6 +81,7 @@ import System.IO
 import System.Log.FastLogger (LoggerSet)
 import qualified Context
 import qualified Control.Concurrent as Concurrent
+import qualified Control.Monad.Catch as Catch
 import qualified Control.Monad.Logger.CallStack.JSON.Internal as Internal
 import qualified Data.ByteString.Char8 as BS8
 import qualified Data.HashMap.Strict as HashMap
@@ -186,11 +184,14 @@ withThreadContext pairs =
 -- | Run a block using a @MonadLogger@ instance which appends to the specified
 -- file.
 --
+-- Note that this differs from the @monad-logger@ version in its constraints.
+-- We use the @exceptions@ here for bracketing, rather than @monad-control@.
+--
 -- @since 0.1.0.0
-runFileLoggingT :: (MonadBaseControl IO m) => FilePath -> LoggingT m a -> m a
+runFileLoggingT :: (MonadIO m, MonadMask m) => FilePath -> LoggingT m a -> m a
 runFileLoggingT filePath action =
-  bracket (liftBase $ openFile filePath AppendMode) (liftBase . hClose) \h -> do
-    liftBase $ hSetBuffering h LineBuffering
+  Catch.bracket (liftIO $ openFile filePath AppendMode) (liftIO . hClose) \h -> do
+    liftIO $ hSetBuffering h LineBuffering
     runLoggingT action $ defaultOutput h
 
 -- | Run a block using a @MonadLogger@ instance which prints to stderr.

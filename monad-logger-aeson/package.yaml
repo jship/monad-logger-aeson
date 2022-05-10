@@ -24,12 +24,9 @@ library:
   - context >=0.2.0.0 && <0.3
   - exceptions
   - fast-logger
-  - lifted-base
-  - monad-control
   - monad-logger
   - text
   - time
-  - transformers-base
   - unordered-containers
   source-dirs: library
 
