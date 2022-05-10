@@ -40,9 +40,15 @@ tests:
     build-tools:
     - hspec-discover
     dependencies:
+    - aeson
+    - aeson-diff
     - base
+    - bytestring
     - hspec
+    - monad-logger
     - monad-logger-aeson
+    - temporary
+    - time
 
 executables:
   monad-logger-aeson:

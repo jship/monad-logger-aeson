@@ -68,7 +68,13 @@ test-suite monad-logger-aeson-test-suite
   build-tool-depends:
       hspec-discover:hspec-discover
   build-depends:
-      base
+      aeson
+    , aeson-diff
+    , base
+    , bytestring
     , hspec
+    , monad-logger
     , monad-logger-aeson
+    , temporary
+    , time
   default-language: Haskell2010

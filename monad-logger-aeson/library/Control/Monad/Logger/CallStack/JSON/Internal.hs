@@ -44,10 +44,11 @@ module Control.Monad.Logger.CallStack.JSON.Internal
   ) where
 
 import Context (Store)
+import Control.Applicative (Applicative(liftA2))
 import Control.Monad.Logger
   ( Loc(..), LogLevel(..), MonadLogger(..), ToLogStr(..), LogSource, LoggingT
   )
-import Data.Aeson (KeyValue((.=)), Value, (.:), (.:?), Encoding, FromJSON, ToJSON)
+import Data.Aeson (KeyValue((.=)), (.:), (.:?), Encoding, FromJSON, ToJSON, Value)
 import Data.Aeson.Encoding.Internal (Series(..))
 import Data.Aeson.Types (Pair, Parser)
 import Data.HashMap.Strict (HashMap)
@@ -117,11 +118,11 @@ instance FromJSON LoggedMessage where
     parseLoc =
       traverse $ Aeson.withObject "Loc" \obj ->
         Loc
-          <$> obj .: "package"
+          <$> obj .: "file"
+          <*> obj .: "package"
           <*> obj .: "module"
-          <*> obj .: "file"
-          <*> obj .: "line"
-          <*> obj .: "char"
+          <*> (liftA2 (,) (obj .: "line") (obj .: "char"))
+          <*> pure (0, 0)
 
     parsePairs :: Maybe Value -> Parser [Pair]
     parsePairs = \case
