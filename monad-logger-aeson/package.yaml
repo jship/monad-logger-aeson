@@ -41,10 +41,10 @@ tests:
     - aeson-diff
     - base
     - bytestring
+    - directory
     - hspec
     - monad-logger
     - monad-logger-aeson
-    - temporary
     - time
 
 executables:
