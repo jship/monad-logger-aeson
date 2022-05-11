@@ -58,6 +58,11 @@ test-suite monad-logger-aeson-test-suite
   main-is: Driver.hs
   other-modules:
       Test.Control.Monad.Logger.CallStack.JSONSpec
+      TestCase
+      TestCase.LogDebug.MetadataNoThreadContextNo
+      TestCase.LogDebug.MetadataNoThreadContextYes
+      TestCase.LogDebug.MetadataYesThreadContextNo
+      TestCase.LogDebug.MetadataYesThreadContextYes
       Paths_monad_logger_aeson
   hs-source-dirs:
       test-suite
