@@ -2,12 +2,12 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
-module TestCase.LogDebug.MetadataNoThreadContextYes
+module TestCase.LogWarnNS.MetadataNoThreadContextYes
   ( testCase
   ) where
 
 import Control.Monad.Logger.CallStack.JSON
-  ( Loc(..), LogLevel(..), LoggedMessage(..), logDebug, withThreadContext
+  ( Loc(..), LogLevel(..), LoggedMessage(..), logWarnNS, withThreadContext
   )
 import Data.Aeson ((.=))
 import Data.Aeson.QQ.Simple (aesonQQ)
@@ -20,20 +20,21 @@ testCase logFilePath =
   TestCase
     { actionUnderTest = do
         withThreadContext ["reqId" .= ("74ec1d0b" :: String)] do
-          logDebug "No metadata"
+          logWarnNS "tests" "No metadata"
     , logFilePath
     , expectedValue =
         [aesonQQ|
           {
             "time": "2022-05-07T20:03:54.0000000Z",
-            "level": "debug",
+            "level": "warn",
             "location": {
               "package": "main",
-              "module": "TestCase.LogDebug.MetadataNoThreadContextYes",
-              "file": "test-suite/TestCase/LogDebug/MetadataNoThreadContextYes.hs",
+              "module": "TestCase.LogWarnNS.MetadataNoThreadContextYes",
+              "file": "test-suite/TestCase/LogWarnNS/MetadataNoThreadContextYes.hs",
               "line": 23,
               "char": 11
             },
+            "source": "tests",
             "context": {
               "tid": "ThreadId 1",
               "reqId": "74ec1d0b"
@@ -57,16 +58,16 @@ testCase logFilePath =
                 { utctDay = Time.fromGregorian 2022 05 07
                 , utctDayTime = 72234
                 }
-          , loggedMessageLevel = LevelDebug
+          , loggedMessageLevel = LevelWarn
           , loggedMessageLoc =
               Just Loc
                 { loc_package = "main"
-                , loc_module = "TestCase.LogDebug.MetadataNoThreadContextYes"
-                , loc_filename = "test-suite/TestCase/LogDebug/MetadataNoThreadContextYes.hs"
+                , loc_module = "TestCase.LogWarnNS.MetadataNoThreadContextYes"
+                , loc_filename = "test-suite/TestCase/LogWarnNS/MetadataNoThreadContextYes.hs"
                 , loc_start = (23, 11)
                 , loc_end = (0, 0)
                 }
-          , loggedMessageLogSource = Nothing
+          , loggedMessageLogSource = Just "tests"
           , loggedMessageThreadContext =
               [ "reqId" .= ("74ec1d0b" :: String)
               , "tid" .= ("ThreadId 1" :: String)

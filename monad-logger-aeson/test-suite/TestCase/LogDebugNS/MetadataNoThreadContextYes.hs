@@ -2,12 +2,12 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
-module TestCase.LogDebug.MetadataNoThreadContextYes
+module TestCase.LogDebugNS.MetadataNoThreadContextYes
   ( testCase
   ) where
 
 import Control.Monad.Logger.CallStack.JSON
-  ( Loc(..), LogLevel(..), LoggedMessage(..), logDebug, withThreadContext
+  ( Loc(..), LogLevel(..), LoggedMessage(..), logDebugNS, withThreadContext
   )
 import Data.Aeson ((.=))
 import Data.Aeson.QQ.Simple (aesonQQ)
@@ -20,7 +20,7 @@ testCase logFilePath =
   TestCase
     { actionUnderTest = do
         withThreadContext ["reqId" .= ("74ec1d0b" :: String)] do
-          logDebug "No metadata"
+          logDebugNS "tests" "No metadata"
     , logFilePath
     , expectedValue =
         [aesonQQ|
@@ -29,11 +29,12 @@ testCase logFilePath =
             "level": "debug",
             "location": {
               "package": "main",
-              "module": "TestCase.LogDebug.MetadataNoThreadContextYes",
-              "file": "test-suite/TestCase/LogDebug/MetadataNoThreadContextYes.hs",
+              "module": "TestCase.LogDebugNS.MetadataNoThreadContextYes",
+              "file": "test-suite/TestCase/LogDebugNS/MetadataNoThreadContextYes.hs",
               "line": 23,
               "char": 11
             },
+            "source": "tests",
             "context": {
               "tid": "ThreadId 1",
               "reqId": "74ec1d0b"
@@ -61,12 +62,12 @@ testCase logFilePath =
           , loggedMessageLoc =
               Just Loc
                 { loc_package = "main"
-                , loc_module = "TestCase.LogDebug.MetadataNoThreadContextYes"
-                , loc_filename = "test-suite/TestCase/LogDebug/MetadataNoThreadContextYes.hs"
+                , loc_module = "TestCase.LogDebugNS.MetadataNoThreadContextYes"
+                , loc_filename = "test-suite/TestCase/LogDebugNS/MetadataNoThreadContextYes.hs"
                 , loc_start = (23, 11)
                 , loc_end = (0, 0)
                 }
-          , loggedMessageLogSource = Nothing
+          , loggedMessageLogSource = Just "tests"
           , loggedMessageThreadContext =
               [ "reqId" .= ("74ec1d0b" :: String)
               , "tid" .= ("ThreadId 1" :: String)

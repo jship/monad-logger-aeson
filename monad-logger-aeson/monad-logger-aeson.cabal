@@ -63,6 +63,42 @@ test-suite monad-logger-aeson-test-suite
       TestCase.LogDebug.MetadataNoThreadContextYes
       TestCase.LogDebug.MetadataYesThreadContextNo
       TestCase.LogDebug.MetadataYesThreadContextYes
+      TestCase.LogDebugNS.MetadataNoThreadContextNo
+      TestCase.LogDebugNS.MetadataNoThreadContextYes
+      TestCase.LogDebugNS.MetadataYesThreadContextNo
+      TestCase.LogDebugNS.MetadataYesThreadContextYes
+      TestCase.LogError.MetadataNoThreadContextNo
+      TestCase.LogError.MetadataNoThreadContextYes
+      TestCase.LogError.MetadataYesThreadContextNo
+      TestCase.LogError.MetadataYesThreadContextYes
+      TestCase.LogErrorNS.MetadataNoThreadContextNo
+      TestCase.LogErrorNS.MetadataNoThreadContextYes
+      TestCase.LogErrorNS.MetadataYesThreadContextNo
+      TestCase.LogErrorNS.MetadataYesThreadContextYes
+      TestCase.LogInfo.MetadataNoThreadContextNo
+      TestCase.LogInfo.MetadataNoThreadContextYes
+      TestCase.LogInfo.MetadataYesThreadContextNo
+      TestCase.LogInfo.MetadataYesThreadContextYes
+      TestCase.LogInfoNS.MetadataNoThreadContextNo
+      TestCase.LogInfoNS.MetadataNoThreadContextYes
+      TestCase.LogInfoNS.MetadataYesThreadContextNo
+      TestCase.LogInfoNS.MetadataYesThreadContextYes
+      TestCase.LogOther.MetadataNoThreadContextNo
+      TestCase.LogOther.MetadataNoThreadContextYes
+      TestCase.LogOther.MetadataYesThreadContextNo
+      TestCase.LogOther.MetadataYesThreadContextYes
+      TestCase.LogOtherNS.MetadataNoThreadContextNo
+      TestCase.LogOtherNS.MetadataNoThreadContextYes
+      TestCase.LogOtherNS.MetadataYesThreadContextNo
+      TestCase.LogOtherNS.MetadataYesThreadContextYes
+      TestCase.LogWarn.MetadataNoThreadContextNo
+      TestCase.LogWarn.MetadataNoThreadContextYes
+      TestCase.LogWarn.MetadataYesThreadContextNo
+      TestCase.LogWarn.MetadataYesThreadContextYes
+      TestCase.LogWarnNS.MetadataNoThreadContextNo
+      TestCase.LogWarnNS.MetadataNoThreadContextYes
+      TestCase.LogWarnNS.MetadataYesThreadContextNo
+      TestCase.LogWarnNS.MetadataYesThreadContextYes
       Paths_monad_logger_aeson
   hs-source-dirs:
       test-suite
