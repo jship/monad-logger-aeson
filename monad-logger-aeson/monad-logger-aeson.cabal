@@ -99,6 +99,10 @@ test-suite monad-logger-aeson-test-suite
       TestCase.LogWarnNS.MetadataNoThreadContextYes
       TestCase.LogWarnNS.MetadataYesThreadContextNo
       TestCase.LogWarnNS.MetadataYesThreadContextYes
+      TestCase.MonadLogger.LogDebug.ThreadContextNo
+      TestCase.MonadLogger.LogDebug.ThreadContextYes
+      TestCase.MonadLogger.LogDebugN.ThreadContextNo
+      TestCase.MonadLogger.LogDebugN.ThreadContextYes
       Paths_monad_logger_aeson
   hs-source-dirs:
       test-suite

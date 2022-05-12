@@ -90,7 +90,7 @@ newtype Logger = Logger
 data LoggedMessage = LoggedMessage
   { loggedMessageTimestamp :: UTCTime
   , loggedMessageLevel :: LogLevel
-  , loggedMessageLoc :: Maybe Loc
+  , loggedMessageLoc :: Maybe Loc -- TODO: Add some tests using @monad-logger@ stuff to check this
   , loggedMessageLogSource :: Maybe LogSource
   , loggedMessageThreadContext :: [Pair]
   , loggedMessageMessage :: Message

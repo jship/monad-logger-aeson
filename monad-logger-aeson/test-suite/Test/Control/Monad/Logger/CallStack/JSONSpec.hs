@@ -49,6 +49,10 @@ import qualified TestCase.LogWarnNS.MetadataNoThreadContextNo
 import qualified TestCase.LogWarnNS.MetadataNoThreadContextYes
 import qualified TestCase.LogWarnNS.MetadataYesThreadContextNo
 import qualified TestCase.LogWarnNS.MetadataYesThreadContextYes
+import qualified TestCase.MonadLogger.LogDebug.ThreadContextNo
+import qualified TestCase.MonadLogger.LogDebug.ThreadContextYes
+import qualified TestCase.MonadLogger.LogDebugN.ThreadContextNo
+import qualified TestCase.MonadLogger.LogDebugN.ThreadContextYes
 
 spec :: Spec
 spec = do
@@ -153,3 +157,16 @@ spec = do
           runTest $ TestCase.LogOtherNS.MetadataYesThreadContextNo.testCase logFilePath
         it "metadata + thread context" \logFilePath -> do
           runTest $ TestCase.LogOtherNS.MetadataYesThreadContextYes.testCase logFilePath
+
+    describe "Control.Monad.Logger.CallStack ('log*' from 'monad-logger')" do
+      describe "logDebug" do
+        it "no metadata + no thread context" \logFilePath -> do
+          runTest $ TestCase.MonadLogger.LogDebug.ThreadContextNo.testCase logFilePath
+        it "no metadata + thread context" \logFilePath -> do
+          runTest $ TestCase.MonadLogger.LogDebug.ThreadContextYes.testCase logFilePath
+
+      describe "logDebugN" do
+        it "no metadata + no thread context" \logFilePath -> do
+          runTest $ TestCase.MonadLogger.LogDebugN.ThreadContextNo.testCase logFilePath
+        it "no metadata + thread context" \logFilePath -> do
+          runTest $ TestCase.MonadLogger.LogDebugN.ThreadContextYes.testCase logFilePath
