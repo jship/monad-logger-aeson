@@ -22,9 +22,6 @@ module Control.Monad.Logger.CallStack.JSON.Internal
   , messageEncoding
   , messageSeries
 
-    -- ** @Logger@-related
-  , Logger(..)
-
     -- ** @LogItem@-related
   , LogItem(..)
   , logItemEncoding
@@ -45,9 +42,7 @@ module Control.Monad.Logger.CallStack.JSON.Internal
 
 import Context (Store)
 import Control.Applicative (Applicative(liftA2))
-import Control.Monad.Logger
-  ( Loc(..), LogLevel(..), MonadLogger(..), ToLogStr(..), LogSource, LoggingT
-  )
+import Control.Monad.Logger (Loc(..), LogLevel(..), MonadLogger(..), ToLogStr(..), LogSource)
 import Data.Aeson (KeyValue((.=)), (.:), (.:?), Encoding, FromJSON, ToJSON, Value)
 import Data.Aeson.Encoding.Internal (Series(..))
 import Data.Aeson.Types (Pair, Parser)
@@ -82,10 +77,6 @@ import qualified Data.Aeson.KeyMap as AesonCompat (toList)
 import qualified Data.HashMap.Strict as AesonCompat (toList)
 type Key = Text
 #endif
-
-newtype Logger = Logger
-  { withLogging :: forall m a. LoggingT m a -> m a
-  }
 
 data LoggedMessage = LoggedMessage
   { loggedMessageTimestamp :: UTCTime
