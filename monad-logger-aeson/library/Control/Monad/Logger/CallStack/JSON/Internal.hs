@@ -16,6 +16,7 @@ module Control.Monad.Logger.CallStack.JSON.Internal
   , LoggedMessage(..)
   , messageMetaStore
   , logCS
+  , OutputOptions(..)
   , defaultLogStrBS
   , defaultLogStrLBS
   , messageToLogStr
@@ -231,6 +232,12 @@ messageMetaStore =
     $ Just
     $ HashMap.empty
 {-# NOINLINE messageMetaStore #-}
+
+data OutputOptions = OutputOptions
+  { outputAction :: LogLevel -> BS8.ByteString -> IO ()
+  , outputIncludeThreadId :: Bool
+  , outputBaseThreadContext :: [Pair]
+  }
 
 defaultLogStrBS
   :: UTCTime

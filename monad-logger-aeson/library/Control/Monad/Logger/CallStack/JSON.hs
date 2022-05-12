@@ -1,6 +1,7 @@
 {-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Control.Monad.Logger.CallStack.JSON
   ( Message(..)
@@ -31,9 +32,16 @@ module Control.Monad.Logger.CallStack.JSON
   , runFastLoggingT
 
   , defaultOutput
-  , defaultOutputWith
   , handleOutput
   , fastLoggerOutput
+
+  , defaultOutputWith
+  , defaultOutputOptions
+  , OutputOptions
+  , outputAction
+  , outputIncludeThreadId
+  , outputBaseThreadContext
+
   , defaultLogStr
 
   , defaultHandleFromLevel
@@ -69,7 +77,9 @@ import Control.Monad.Logger as Log hiding
 
 import Control.Monad.Catch (MonadMask)
 import Control.Monad.IO.Class (MonadIO(liftIO))
-import Control.Monad.Logger.CallStack.JSON.Internal (LoggedMessage(..), Message(..))
+import Control.Monad.Logger.CallStack.JSON.Internal
+  ( LoggedMessage(..), Message(..), OutputOptions(..)
+  )
 import Data.Aeson.Types (Value(String), Pair)
 import Data.Text (Text)
 import Data.Time (UTCTime)
@@ -231,26 +241,42 @@ defaultOutput
   -> IO ()
 defaultOutput handle = handleOutput (const handle)
 
+defaultOutputOptions :: (LogLevel -> BS8.ByteString -> IO ()) -> OutputOptions
+defaultOutputOptions outputAction =
+  OutputOptions
+    { outputAction
+    , outputIncludeThreadId = True
+    , outputBaseThreadContext = []
+    }
+
 defaultOutputWith
-  :: [Pair]
-  -> (LogLevel -> BS8.ByteString -> IO ())
+  :: OutputOptions
   -> Loc
   -> LogSource
   -> LogLevel
   -> LogStr
   -> IO ()
-defaultOutputWith baseThreadContext output location logSource logLevel msg = do
+defaultOutputWith outputOptions location logSource logLevel msg = do
   now <- Time.getCurrentTime
   threadIdText <- fmap (Text.pack . show) Concurrent.myThreadId
   threadContext <- Context.mines Internal.messageMetaStore \hashMap ->
     HashMap.toList
-      $ HashMap.insert "tid" (String threadIdText)
+      $ ( if outputIncludeThreadId then
+            HashMap.insert "tid" $ String threadIdText
+          else
+            id
+        )
       $ HashMap.union hashMap
       $ baseThreadContextHashMap
-  output logLevel
+  outputAction logLevel
     $ Internal.defaultLogStrBS now threadContext location logSource logLevel msg
   where
-  baseThreadContextHashMap = HashMap.fromList baseThreadContext
+  baseThreadContextHashMap = HashMap.fromList outputBaseThreadContext
+  OutputOptions
+    { outputAction
+    , outputIncludeThreadId
+    , outputBaseThreadContext
+    } = outputOptions
 
 handleOutput
   :: (LogLevel -> Handle)
@@ -260,7 +286,7 @@ handleOutput
   -> LogStr
   -> IO ()
 handleOutput levelToHandle =
-  defaultOutputWith [] \logLevel bytes -> do
+  defaultOutputWith $ defaultOutputOptions \logLevel bytes -> do
     BS8.hPutStrLn (levelToHandle logLevel) bytes
 
 fastLoggerOutput
@@ -271,7 +297,7 @@ fastLoggerOutput
   -> LogStr
   -> IO ()
 fastLoggerOutput loggerSet =
-  defaultOutputWith [] \_logLevel bytes -> do
+  defaultOutputWith $ defaultOutputOptions \_logLevel bytes -> do
     FastLogger.pushLogStrLn loggerSet $ toLogStr bytes
 
 defaultLogStr
