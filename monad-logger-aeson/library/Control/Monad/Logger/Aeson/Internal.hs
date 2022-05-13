@@ -14,7 +14,7 @@ module Control.Monad.Logger.Aeson.Internal
     -- ** @Message@-related
     Message(..)
   , LoggedMessage(..)
-  , messageMetaStore
+  , threadContextStore
   , logCS
   , OutputOptions(..)
   , defaultLogStrBS
@@ -218,6 +218,8 @@ instance ToJSON LoggedMessage where
 -- so with @:#@ (and enough squinting), we are @cons@-ing a textual message onto
 -- a JSON object. Yes, this mnemonic isn't well-typed, but hopefully it still
 -- helps!
+--
+-- @since 0.1.0.0
 data Message = Text :# [Pair]
   deriving stock (Eq, Generic, Ord, Show)
 infixr 5 :#
@@ -225,18 +227,51 @@ infixr 5 :#
 instance IsString Message where
   fromString string = Text.pack string :# []
 
-messageMetaStore :: Store (HashMap Key Value)
-messageMetaStore =
+-- | Thread-safe, global 'Store' that captures the thread context of messages.
+--
+-- Note that there is a bit of somewhat unavoidable name-overloading here: this
+-- binding is called 'threadContextStore' because it stores the thread context
+-- (i.e. @ThreadContext@/@MDC@ from Java land) for messages. It also just so
+-- happens that the 'Store' type comes from the @context@ package, which is a
+-- package providing thread-indexed storage of arbitrary context values. Please
+-- don't hate the player!
+--
+-- @since 0.1.0.0
+threadContextStore :: Store (HashMap Key Value)
+threadContextStore =
   IO.Unsafe.unsafePerformIO
     $ Context.newStore Context.noPropagation
     $ Just
     $ HashMap.empty
-{-# NOINLINE messageMetaStore #-}
+{-# NOINLINE threadContextStore #-}
 
+-- | 'OutputOptions' is for use with
+-- 'Control.Monad.Logger.Aeson.defaultOutputWith' and enables us to configure
+-- the JSON output produced by this library.
+--
+-- We can get a hold of a value of this type via
+-- 'Control.Monad.Logger.Aeson.defaultOutputOptions'.
+--
+-- @since 0.1.0.0
 data OutputOptions = OutputOptions
   { outputAction :: LogLevel -> BS8.ByteString -> IO ()
-  , outputIncludeThreadId :: Bool
-  , outputBaseThreadContext :: [Pair]
+  , -- | Controls whether or not the thread ID is included in each log message's
+    -- thread context.
+    --
+    -- Default: 'True'
+    outputIncludeThreadId :: Bool
+  , -- | Allows for setting a "base" thread context, i.e. a set of 'Pair' that
+    -- will always be present in log messages.
+    --
+    -- If we subsequently use 'Control.Monad.Logger.Aeson.withThreadContext' to
+    -- register some thread context for our messages, if any of the keys in
+    -- those 'Pair' values overlap with the "base" thread context, then the
+    -- overlapped 'Pair' values in the "base" thread context will be overridden
+    -- for the duration of the action provided to
+    -- 'Control.Monad.Logger.Aeson.withThreadContext'.
+    --
+    -- Default: 'mempty'
+    outputBaseThreadContext :: [Pair]
   }
 
 defaultLogStrBS
