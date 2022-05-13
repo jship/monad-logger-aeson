@@ -5,9 +5,7 @@ module TestCase.LogErrorNS.MetadataYesThreadContextNo
   ( testCase
   ) where
 
-import Control.Monad.Logger.CallStack.JSON
-  ( Loc(..), LogLevel(..), LoggedMessage(..), Message(..), logErrorNS
-  )
+import Control.Monad.Logger.Aeson (Loc(..), LogLevel(..), LoggedMessage(..), Message(..), logErrorNS)
 import Data.Aeson ((.=))
 import Data.Aeson.QQ.Simple (aesonQQ)
 import Data.Time (UTCTime(..))
@@ -32,7 +30,7 @@ testCase logFilePath =
               "package": "main",
               "module": "TestCase.LogErrorNS.MetadataYesThreadContextNo",
               "file": "test-suite/TestCase/LogErrorNS/MetadataYesThreadContextNo.hs",
-              "line": 21,
+              "line": 19,
               "char": 9
             },
             "source": "tests",
@@ -68,7 +66,7 @@ testCase logFilePath =
                 { loc_package = "main"
                 , loc_module = "TestCase.LogErrorNS.MetadataYesThreadContextNo"
                 , loc_filename = "test-suite/TestCase/LogErrorNS/MetadataYesThreadContextNo.hs"
-                , loc_start = (21, 9)
+                , loc_start = (19, 9)
                 , loc_end = (0, 0)
                 }
           , loggedMessageLogSource = Just "tests"

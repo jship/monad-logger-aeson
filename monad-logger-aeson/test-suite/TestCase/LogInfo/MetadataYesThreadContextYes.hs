@@ -6,7 +6,7 @@ module TestCase.LogInfo.MetadataYesThreadContextYes
   ( testCase
   ) where
 
-import Control.Monad.Logger.CallStack.JSON
+import Control.Monad.Logger.Aeson
   ( Loc(..), LogLevel(..), LoggedMessage(..), Message(..), logInfo, withThreadContext
   )
 import Data.Aeson ((.=))

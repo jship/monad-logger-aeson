@@ -3,7 +3,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Control.Monad.Logger.CallStack.JSON
+module Control.Monad.Logger.Aeson
   ( Message(..)
   , LoggedMessage(..)
 
@@ -77,9 +77,7 @@ import Control.Monad.Logger as Log hiding
 
 import Control.Monad.Catch (MonadMask)
 import Control.Monad.IO.Class (MonadIO(liftIO))
-import Control.Monad.Logger.CallStack.JSON.Internal
-  ( LoggedMessage(..), Message(..), OutputOptions(..)
-  )
+import Control.Monad.Logger.Aeson.Internal (LoggedMessage(..), Message(..), OutputOptions(..))
 import Data.Aeson.Types (Value(String), Pair)
 import Data.Text (Text)
 import Data.Time (UTCTime)
@@ -92,7 +90,7 @@ import System.Log.FastLogger (LoggerSet)
 import qualified Context
 import qualified Control.Concurrent as Concurrent
 import qualified Control.Monad.Catch as Catch
-import qualified Control.Monad.Logger.CallStack.JSON.Internal as Internal
+import qualified Control.Monad.Logger.Aeson.Internal as Internal
 import qualified Data.ByteString.Char8 as BS8
 import qualified Data.HashMap.Strict as HashMap
 import qualified Data.Text as Text

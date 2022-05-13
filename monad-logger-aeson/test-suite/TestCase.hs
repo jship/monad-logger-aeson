@@ -7,9 +7,7 @@ module TestCase
   , withTempLogFile
   ) where
 
-import Control.Monad.Logger.CallStack.JSON
-  ( LoggedMessage(..), Message(..), LoggingT, runFileLoggingT
-  )
+import Control.Monad.Logger.Aeson (LoggedMessage(..), Message(..), LoggingT, runFileLoggingT)
 import Data.Aeson (Result(..), Value)
 import Data.Aeson.Diff (Patch(..))
 import GHC.Stack (HasCallStack)

@@ -6,9 +6,7 @@ module TestCase.MonadLogger.LogDebug.ThreadContextYes
   ( testCase
   ) where
 
-import Control.Monad.Logger.CallStack.JSON
-  ( Loc(..), LogLevel(..), LoggedMessage(..), withThreadContext
-  )
+import Control.Monad.Logger.Aeson (Loc(..), LogLevel(..), LoggedMessage(..), withThreadContext)
 import Data.Aeson ((.=))
 import Data.Aeson.QQ.Simple (aesonQQ)
 import Data.Time (UTCTime(..))
@@ -32,7 +30,7 @@ testCase logFilePath =
               "package": "main",
               "module": "TestCase.MonadLogger.LogDebug.ThreadContextYes",
               "file": "test-suite/TestCase/MonadLogger/LogDebug/ThreadContextYes.hs",
-              "line": 24,
+              "line": 22,
               "char": 11
             },
             "context": {
@@ -64,7 +62,7 @@ testCase logFilePath =
                 { loc_package = "main"
                 , loc_module = "TestCase.MonadLogger.LogDebug.ThreadContextYes"
                 , loc_filename = "test-suite/TestCase/MonadLogger/LogDebug/ThreadContextYes.hs"
-                , loc_start = (24, 11)
+                , loc_start = (22, 11)
                 , loc_end = (0, 0)
                 }
           , loggedMessageLogSource = Nothing

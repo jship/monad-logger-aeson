@@ -18,8 +18,8 @@ extra-source-files:
 
 library
   exposed-modules:
-      Control.Monad.Logger.CallStack.JSON
-      Control.Monad.Logger.CallStack.JSON.Internal
+      Control.Monad.Logger.Aeson
+      Control.Monad.Logger.Aeson.Internal
   other-modules:
       Paths_monad_logger_aeson
   hs-source-dirs:
@@ -57,7 +57,7 @@ test-suite monad-logger-aeson-test-suite
   type: exitcode-stdio-1.0
   main-is: Driver.hs
   other-modules:
-      Test.Control.Monad.Logger.CallStack.JSONSpec
+      Test.Control.Monad.Logger.AesonSpec
       TestCase
       TestCase.LogDebug.MetadataNoThreadContextNo
       TestCase.LogDebug.MetadataNoThreadContextYes

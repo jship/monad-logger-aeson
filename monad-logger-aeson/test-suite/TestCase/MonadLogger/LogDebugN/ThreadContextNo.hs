@@ -5,7 +5,7 @@ module TestCase.MonadLogger.LogDebugN.ThreadContextNo
   ( testCase
   ) where
 
-import Control.Monad.Logger.CallStack.JSON (LogLevel(..), LoggedMessage(..))
+import Control.Monad.Logger.Aeson (LogLevel(..), LoggedMessage(..))
 import Data.Aeson ((.=))
 import Data.Aeson.QQ.Simple (aesonQQ)
 import Data.Time (UTCTime(..))

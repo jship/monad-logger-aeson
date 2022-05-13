@@ -3,7 +3,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TypeApplications #-}
-module Test.Control.Monad.Logger.CallStack.JSONSpec
+module Test.Control.Monad.Logger.AesonSpec
   ( spec
   ) where
 
@@ -57,7 +57,7 @@ import qualified TestCase.MonadLogger.LogDebugN.ThreadContextYes
 spec :: Spec
 spec = do
   aroundAll withTempLogFile do
-    describe "Control.Monad.Logger.CallStack.JSON" do
+    describe "Control.Monad.Logger.Aeson" do
       describe "logDebug" do
         it "no metadata + no thread context" \logFilePath -> do
           runTest $ TestCase.LogDebug.MetadataNoThreadContextNo.testCase logFilePath

@@ -7,7 +7,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE StrictData #-}
-module Control.Monad.Logger.CallStack.JSON.Internal
+module Control.Monad.Logger.Aeson.Internal
   ( -- * Disclaimer
     -- $disclaimer
 
