@@ -5,8 +5,7 @@ module TestCase.LogWarnNS.MetadataYesThreadContextNo
   ( testCase
   ) where
 
-import Control.Monad.Logger.Aeson (Loc(..), LogLevel(..), LoggedMessage(..), Message(..), logWarnNS)
-import Data.Aeson ((.=))
+import Control.Monad.Logger.Aeson ((.@), Loc(..), LogLevel(..), LoggedMessage(..), Message(..), logWarnNS)
 import Data.Aeson.QQ.Simple (aesonQQ)
 import Data.Time (UTCTime(..))
 import TestCase (TestCase(..))
@@ -17,8 +16,8 @@ testCase logFilePath =
   TestCase
     { actionUnderTest = do
         logWarnNS "tests" $ "With metadata" :#
-          [ "a" .= (42 :: Int)
-          , "b" .= ("x" :: String)
+          [ "a" .@ (42 :: Int)
+          , "b" .@ ("x" :: String)
           ]
     , logFilePath
     , expectedValue =
@@ -30,7 +29,7 @@ testCase logFilePath =
               "package": "main",
               "module": "TestCase.LogWarnNS.MetadataYesThreadContextNo",
               "file": "test-suite/TestCase/LogWarnNS/MetadataYesThreadContextNo.hs",
-              "line": 19,
+              "line": 18,
               "char": 9
             },
             "source": "tests",
@@ -66,14 +65,14 @@ testCase logFilePath =
                 { loc_package = "main"
                 , loc_module = "TestCase.LogWarnNS.MetadataYesThreadContextNo"
                 , loc_filename = "test-suite/TestCase/LogWarnNS/MetadataYesThreadContextNo.hs"
-                , loc_start = (19, 9)
+                , loc_start = (18, 9)
                 , loc_end = (0, 0)
                 }
           , loggedMessageLogSource = Just "tests"
-          , loggedMessageThreadContext = ["tid" .= ("ThreadId 1" :: String)]
+          , loggedMessageThreadContext = ["tid" .@ ("ThreadId 1" :: String)]
           , loggedMessageMessage = "With metadata" :#
-              [ "a" .= (42 :: Int)
-              , "b" .= ("x" :: String)
+              [ "a" .@ (42 :: Int)
+              , "b" .@ ("x" :: String)
               ]
           }
     }

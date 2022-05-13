@@ -7,9 +7,8 @@ module TestCase.LogWarn.MetadataNoThreadContextYes
   ) where
 
 import Control.Monad.Logger.Aeson
-  ( Loc(..), LogLevel(..), LoggedMessage(..), logWarn, withThreadContext
+  ( (.@), Loc(..), LogLevel(..), LoggedMessage(..), logWarn, withThreadContext
   )
-import Data.Aeson ((.=))
 import Data.Aeson.QQ.Simple (aesonQQ)
 import Data.Time (UTCTime(..))
 import TestCase (TestCase(..))
@@ -19,7 +18,7 @@ testCase :: FilePath -> TestCase
 testCase logFilePath =
   TestCase
     { actionUnderTest = do
-        withThreadContext ["reqId" .= ("74ec1d0b" :: String)] do
+        withThreadContext ["reqId" .@ ("74ec1d0b" :: String)] do
           logWarn $ "No metadata"
     , logFilePath
     , expectedValue =
@@ -31,7 +30,7 @@ testCase logFilePath =
               "package": "main",
               "module": "TestCase.LogWarn.MetadataNoThreadContextYes",
               "file": "test-suite/TestCase/LogWarn/MetadataNoThreadContextYes.hs",
-              "line": 23,
+              "line": 22,
               "char": 11
             },
             "context": {
@@ -63,13 +62,13 @@ testCase logFilePath =
                 { loc_package = "main"
                 , loc_module = "TestCase.LogWarn.MetadataNoThreadContextYes"
                 , loc_filename = "test-suite/TestCase/LogWarn/MetadataNoThreadContextYes.hs"
-                , loc_start = (23, 11)
+                , loc_start = (22, 11)
                 , loc_end = (0, 0)
                 }
           , loggedMessageLogSource = Nothing
           , loggedMessageThreadContext =
-              [ "reqId" .= ("74ec1d0b" :: String)
-              , "tid" .= ("ThreadId 1" :: String)
+              [ "reqId" .@ ("74ec1d0b" :: String)
+              , "tid" .@ ("ThreadId 1" :: String)
               ]
           , loggedMessageMessage = "No metadata"
           }

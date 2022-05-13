@@ -5,8 +5,7 @@ module TestCase.LogWarn.MetadataNoThreadContextNo
   ( testCase
   ) where
 
-import Control.Monad.Logger.Aeson (Loc(..), LogLevel(..), LoggedMessage(..), logWarn)
-import Data.Aeson ((.=))
+import Control.Monad.Logger.Aeson ((.@), Loc(..), LogLevel(..), LoggedMessage(..), logWarn)
 import Data.Aeson.QQ.Simple (aesonQQ)
 import Data.Time (UTCTime(..))
 import TestCase (TestCase(..))
@@ -27,7 +26,7 @@ testCase logFilePath =
               "package": "main",
               "module": "TestCase.LogWarn.MetadataNoThreadContextNo",
               "file": "test-suite/TestCase/LogWarn/MetadataNoThreadContextNo.hs",
-              "line": 19,
+              "line": 18,
               "char": 9
             },
             "context": {
@@ -58,11 +57,11 @@ testCase logFilePath =
                 { loc_package = "main"
                 , loc_module = "TestCase.LogWarn.MetadataNoThreadContextNo"
                 , loc_filename = "test-suite/TestCase/LogWarn/MetadataNoThreadContextNo.hs"
-                , loc_start = (19, 9)
+                , loc_start = (18, 9)
                 , loc_end = (0, 0)
                 }
           , loggedMessageLogSource = Nothing
-          , loggedMessageThreadContext = ["tid" .= ("ThreadId 1" :: String)]
+          , loggedMessageThreadContext = ["tid" .@ ("ThreadId 1" :: String)]
           , loggedMessageMessage = "No metadata"
           }
     }

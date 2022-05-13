@@ -7,9 +7,8 @@ module TestCase.LogDebugNS.MetadataYesThreadContextYes
   ) where
 
 import Control.Monad.Logger.Aeson
-  ( Loc(..), LogLevel(..), LoggedMessage(..), Message(..), logDebugNS, withThreadContext
+  ( (.@), Loc(..), LogLevel(..), LoggedMessage(..), Message(..), logDebugNS, withThreadContext
   )
-import Data.Aeson ((.=))
 import Data.Aeson.QQ.Simple (aesonQQ)
 import Data.Time (UTCTime(..))
 import TestCase (TestCase(..))
@@ -19,10 +18,10 @@ testCase :: FilePath -> TestCase
 testCase logFilePath =
   TestCase
     { actionUnderTest = do
-        withThreadContext ["reqId" .= ("74ec1d0b" :: String)] do
+        withThreadContext ["reqId" .@ ("74ec1d0b" :: String)] do
           logDebugNS "tests" $ "With metadata" :#
-            [ "a" .= (42 :: Int)
-            , "b" .= ("x" :: String)
+            [ "a" .@ (42 :: Int)
+            , "b" .@ ("x" :: String)
             ]
     , logFilePath
     , expectedValue =
@@ -34,7 +33,7 @@ testCase logFilePath =
               "package": "main",
               "module": "TestCase.LogDebugNS.MetadataYesThreadContextYes",
               "file": "test-suite/TestCase/LogDebugNS/MetadataYesThreadContextYes.hs",
-              "line": 23,
+              "line": 22,
               "char": 11
             },
             "source": "tests",
@@ -71,17 +70,17 @@ testCase logFilePath =
                 { loc_package = "main"
                 , loc_module = "TestCase.LogDebugNS.MetadataYesThreadContextYes"
                 , loc_filename = "test-suite/TestCase/LogDebugNS/MetadataYesThreadContextYes.hs"
-                , loc_start = (23, 11)
+                , loc_start = (22, 11)
                 , loc_end = (0, 0)
                 }
           , loggedMessageLogSource = Just "tests"
           , loggedMessageThreadContext =
-              [ "reqId" .= ("74ec1d0b" :: String)
-              , "tid" .= ("ThreadId 1" :: String)
+              [ "reqId" .@ ("74ec1d0b" :: String)
+              , "tid" .@ ("ThreadId 1" :: String)
               ]
           , loggedMessageMessage = "With metadata" :#
-              [ "a" .= (42 :: Int)
-              , "b" .= ("x" :: String)
+              [ "a" .@ (42 :: Int)
+              , "b" .@ ("x" :: String)
               ]
           }
     }

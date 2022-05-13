@@ -5,8 +5,7 @@ module TestCase.MonadLogger.LogDebugN.ThreadContextNo
   ( testCase
   ) where
 
-import Control.Monad.Logger.Aeson (LogLevel(..), LoggedMessage(..))
-import Data.Aeson ((.=))
+import Control.Monad.Logger.Aeson ((.@), LogLevel(..), LoggedMessage(..))
 import Data.Aeson.QQ.Simple (aesonQQ)
 import Data.Time (UTCTime(..))
 import TestCase (TestCase(..))
@@ -49,7 +48,7 @@ testCase logFilePath =
           , loggedMessageLevel = LevelDebug
           , loggedMessageLoc = Nothing
           , loggedMessageLogSource = Nothing
-          , loggedMessageThreadContext = ["tid" .= ("ThreadId 1" :: String)]
+          , loggedMessageThreadContext = ["tid" .@ ("ThreadId 1" :: String)]
           , loggedMessageMessage = "Logged from 'monad-logger'"
           }
     }

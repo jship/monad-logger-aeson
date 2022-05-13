@@ -13,6 +13,7 @@ module Control.Monad.Logger.Aeson.Internal
 
     -- ** @Message@-related
     Message(..)
+  , (.@)
   , LoggedMessage(..)
   , threadContextStore
   , logCS
@@ -79,6 +80,10 @@ import qualified Data.HashMap.Strict as AesonCompat (toList)
 type Key = Text
 #endif
 
+-- | Synonym for '.=' from @aeson@.
+(.@) :: (KeyValue kv, ToJSON v) => Key -> v -> kv
+(.@) = (.=)
+
 data LoggedMessage = LoggedMessage
   { loggedMessageTimestamp :: UTCTime
   , loggedMessageLevel :: LogLevel
@@ -131,28 +136,28 @@ instance FromJSON LoggedMessage where
 instance ToJSON LoggedMessage where
   toJSON loggedMessage =
     Aeson.object $ Maybe.catMaybes
-      [ Just $ "time" .= loggedMessageTimestamp
-      , Just $ "level" .= logLevelToText loggedMessageLevel
+      [ Just $ "time" .@ loggedMessageTimestamp
+      , Just $ "level" .@ logLevelToText loggedMessageLevel
       , case loggedMessageLoc of
           Nothing -> Nothing
-          Just loc -> Just $ "location" .= locToJSON loc
+          Just loc -> Just $ "location" .@ locToJSON loc
       , case loggedMessageLogSource of
           Nothing -> Nothing
-          Just logSource -> Just $ "source" .= logSource
+          Just logSource -> Just $ "source" .@ logSource
       , case loggedMessageThreadContext of
           [] -> Nothing
-          pairs -> Just $ "context" .= Aeson.object pairs
-      , Just $ "message" .= messageToJSON loggedMessageMessage
+          pairs -> Just $ "context" .@ Aeson.object pairs
+      , Just $ "message" .@ messageToJSON loggedMessageMessage
       ]
     where
     locToJSON :: Loc -> Value
     locToJSON loc =
       Aeson.object
-        [ "package" .= loc_package
-        , "module" .= loc_module
-        , "file" .= loc_filename
-        , "line" .= fst loc_start
-        , "char" .= snd loc_start
+        [ "package" .@ loc_package
+        , "module" .@ loc_module
+        , "file" .@ loc_filename
+        , "line" .@ fst loc_start
+        , "char" .@ snd loc_start
         ]
       where
       Loc { loc_filename, loc_package, loc_module, loc_start } = loc
@@ -160,10 +165,10 @@ instance ToJSON LoggedMessage where
     messageToJSON :: Message -> Value
     messageToJSON (messageText :# messageMeta) =
       Aeson.object $ Maybe.catMaybes
-        [ Just $ "text" .= messageText
+        [ Just $ "text" .@ messageText
         , case messageMeta of
             [] -> Nothing
-            pairs -> Just $ "meta" .= Aeson.object pairs
+            pairs -> Just $ "meta" .@ Aeson.object pairs
         ]
 
     LoggedMessage
@@ -209,8 +214,8 @@ instance ToJSON LoggedMessage where
 -- Metadata may be included in a 'Message' via the ':#' constructor:
 --
 -- > logDebug $ "Some log message with metadata" :#
--- >   [ "bloorp" .= (42 :: Int)
--- >   , "bonk" .= ("abc" :: Text)
+-- >   [ "bloorp" .@ (42 :: Int)
+-- >   , "bonk" .@ ("abc" :: Text)
 -- >   ]
 --
 -- The mnemonic for the ':#' constructor is that the @#@ symbol is sometimes
@@ -402,7 +407,7 @@ messageEncoding  = Aeson.pairs . messageSeries
 
 messageSeries :: Message -> Series
 messageSeries message =
-  "text" .= messageText
+  "text" .@ messageText
     <> ( if null messageMeta then
            mempty
          else
@@ -415,7 +420,7 @@ pairsEncoding :: [Pair] -> Encoding
 pairsEncoding = Aeson.pairs . pairsSeries
 
 pairsSeries :: [Pair] -> Series
-pairsSeries = mconcat . fmap (uncurry (.=))
+pairsSeries = mconcat . fmap (uncurry (.@))
 
 levelEncoding :: LogLevel -> Encoding
 levelEncoding = Aeson.text . logLevelToText

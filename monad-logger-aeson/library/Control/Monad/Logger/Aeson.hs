@@ -87,8 +87,8 @@ import Control.Monad.Logger as Log hiding
 
 import Control.Monad.Catch (MonadMask, MonadThrow)
 import Control.Monad.IO.Class (MonadIO(liftIO))
-import Control.Monad.Logger.Aeson.Internal (LoggedMessage(..), Message(..), OutputOptions(..))
-import Data.Aeson (Value(String), (.=), Key, ToJSON)
+import Control.Monad.Logger.Aeson.Internal (LoggedMessage(..), Message(..), OutputOptions(..), (.@))
+import Data.Aeson (Value(String))
 import Data.Aeson.Types (Pair)
 import Data.Text (Text)
 import Data.Time (UTCTime)
@@ -107,10 +107,6 @@ import qualified Data.HashMap.Strict as HashMap
 import qualified Data.Text as Text
 import qualified Data.Time as Time
 import qualified System.Log.FastLogger as FastLogger
-
--- | Synonym for '.=' from @aeson@.
-(.@) :: (ToJSON v) => Key -> v -> Pair
-(.@) = (.=)
 
 -- | Logs a 'Message' with the location provided by an implicit 'CallStack'.
 --

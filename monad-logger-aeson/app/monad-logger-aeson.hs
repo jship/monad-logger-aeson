@@ -6,7 +6,6 @@ module Main
   ) where
 
 import Control.Monad.Logger.Aeson
-import Data.Aeson ((.=))
 import Data.Text (Text)
 import qualified Control.Monad.Logger.CallStack as Log
 
@@ -125,11 +124,11 @@ main = do
 --  Log.runFileLoggingT "foo.txt" do
 --    logInfo "some message text"
 --    logDebug "some message text"
---    logDebug $ "some message text" :# ["abc" .= (42 :: Int)]
-  withThreadContext ["reqId" .= (123 :: Int)] $
-    withThreadContext ["stuff" .= ("things" :: Text)] $
-      withThreadContext ["stuff" .= ("things2" :: Text)] $
-        withThreadContext ["reqId" .= ("345" :: Text)] $
+--    logDebug $ "some message text" :# ["abc" .@ (42 :: Int)]
+  withThreadContext ["reqId" .@ (123 :: Int)] $
+    withThreadContext ["stuff" .@ ("things" :: Text)] $
+      withThreadContext ["stuff" .@ ("things2" :: Text)] $
+        withThreadContext ["reqId" .@ ("345" :: Text)] $
           runStdoutLoggingT do
             -- We can use functions from 'monad-logger' directly if we want, though we
             -- won't be able to log pairs with these functions.
@@ -146,10 +145,10 @@ main = do
             -- When we do have pairs, we can just tack on the pairs list with ':#'.
             logWarn $ "foo bar baz" :# []
             logWarn $ "quux stuff" :#
-              [ "bloorp" .= (42 :: Int)
-              , "bonk" .= ("abc" :: Text)
+              [ "bloorp" .@ (42 :: Int)
+              , "bonk" .@ ("abc" :: Text)
               ]
             logWarn $ "quux stuff 2" :#
-              [ "foo" .= Just @Int 42
-              , "bar" .= Nothing @Int
+              [ "foo" .@ Just @Int 42
+              , "bar" .@ Nothing @Int
               ]
