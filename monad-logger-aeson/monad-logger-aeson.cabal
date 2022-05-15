@@ -21,6 +21,7 @@ extra-source-files:
     package.yaml
     README.md
     LICENSE.md
+    CHANGELOG.md
 
 library
   exposed-modules:
