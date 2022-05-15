@@ -341,7 +341,6 @@ defaultLogStrLBS now threadContext loc logSource logLevel logStr =
   logStrLBS = Builder.toLazyByteString logStrBuilder
   LogStr _ logStrBuilder = logStr
 
--- | Sneakiness ensues.
 logCS
   :: (MonadLogger m)
   => CallStack

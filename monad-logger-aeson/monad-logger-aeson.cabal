@@ -40,8 +40,8 @@ library
     , unordered-containers >=0.2.16.0 && <0.3.0.0
   default-language: Haskell2010
 
-executable monad-logger-aeson
-  main-is: monad-logger-aeson.hs
+executable readme-example
+  main-is: readme-example.hs
   other-modules:
       Paths_monad_logger_aeson
   hs-source-dirs:
