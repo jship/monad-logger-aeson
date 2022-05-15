@@ -6,8 +6,8 @@
 ## Synopsis
 
 `monad-logger-aeson` provides structured JSON logging using `monad-logger`'s
-interface. Specifically, it is intended to be a drop-in replacement for
-`monad-logger`'s `Control.Monad.Logger.CallStack` module.
+interface. Specifically, it is intended to be a (largely) drop-in replacement
+for `monad-logger`'s `Control.Monad.Logger.CallStack` module.
 
 For additional detail on the library, please see the [Haddocks][], the
 [announcement blog post][], and the remainder of this README.
@@ -141,9 +141,9 @@ so on. Both by comparing the [reverse dependency list][] for `monad-logger` with
 the other logging libraries' reverse dependency lists, and also consulting our
 personal experiences working on Haskell codebases, `monad-logger` would seem to
 be the most prevalent logging library in the wild. In developing our library as
-a drop-in replacement for `monad-logger`, we hope to empower Haskellers using
-this popular logging interface to add structured logging to their programs with
-minimal fuss.
+a (largely) drop-in replacement for `monad-logger`, we hope to empower
+Haskellers using this popular logging interface to add structured logging to
+their programs with minimal fuss.
 
 We believe we have achieved goal 2 by directly representing in-flight log
 messages using an `aeson` object `Encoding`, and by _never_ parsing these
