@@ -73,13 +73,13 @@ monad-logger-aeson/app/readme-example.hs:12:35: error:
    |
 ```
 
-Indicating that we need to provide the `logDebug` call a `Message` rather than a
-`Text` value. This compiler error gives us a choice depending upon our current
-time constraints: we can either go ahead and convert this `Text` value to a
-"proper" `Message` by moving the metadata it encodes into structured data (i.e.
-a `[Pair]` value, where `Pair` is an `aeson` key and value), or we can defer
-doing that for now by tacking on an empty `[Pair]` value. We'll opt for the
-former here:
+This indicates that we need to provide the `logDebug` call a `Message` rather
+than a `Text` value. This compiler error gives us a choice depending upon our
+current time constraints: we can either go ahead and convert this `Text` value
+to a "proper" `Message` by moving the metadata it encodes into structured data
+(i.e.  a `[Pair]` value, where `Pair` is an `aeson` key and value), or we can
+defer doing that for now by tacking on an empty `[Pair]` value. We'll opt for
+the former here:
 
 ```haskell
 logDebug $ "Doing stuff" :# ["x" .@ x]
