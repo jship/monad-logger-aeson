@@ -4,8 +4,8 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Control.Monad.Logger.Aeson
-  ( -- * Intro
-    -- $intro
+  ( -- * Synopsis
+    -- $synopsis
 
     -- * Types
     Message(..)
@@ -25,7 +25,7 @@ module Control.Monad.Logger.Aeson
   , logWarnCS
   , logErrorCS
   , logOtherCS
-    -- ** Implicit call stack and @LogSource@
+    -- ** Implicit call stack, with @LogSource@
   , logDebugNS
   , logInfoNS
   , logWarnNS
@@ -230,8 +230,8 @@ logOtherNS = Internal.logCS callStack
 --
 -- If we're coming from a Java background, it may be helpful for us to draw
 -- parallels between this function and @log4j2@'s @ThreadContext@ (or perhaps
--- @log4j@'s @MDC@). They all enable the same thing: setting some thread-local,
--- structured info that will be automatically pulled into each logged message.
+-- @log4j@'s @MDC@). They all enable the same thing: setting some thread-local
+-- info that will be automatically pulled into each logged message.
 --
 -- @since 0.1.0.0
 withThreadContext :: (MonadIO m, MonadMask m) => [Pair] -> m a -> m a
@@ -279,8 +279,8 @@ runStdoutLoggingT = flip runLoggingT (defaultOutput stdout)
 -- | Run a block using a 'MonadLogger' instance which prints to a 'Handle'
 -- determined by the log message's 'LogLevel'.
 --
--- A common use case for this function is to log warn/error messages to 'stderr'
--- and debug/info messages to 'stdout' in CLIs/tools (see
+-- A common use case for this function is to log warn\/error messages to 'stderr'
+-- and debug\/info messages to 'stdout' in CLIs/tools (see
 -- 'defaultHandleFromLevel').
 --
 -- @since 0.1.0.0
@@ -418,6 +418,7 @@ fastLoggerOutput loggerSet =
   defaultOutputWith $ defaultOutputOptions \_logLevel bytes -> do
     FastLogger.pushLogStrLn loggerSet $ toLogStr bytes
 
+-- | @since 0.1.0.0
 defaultLogStr
   :: UTCTime
   -> [Pair]
@@ -449,6 +450,68 @@ defaultHandleFromLevel otherLevelToHandle = \case
   LevelError -> stderr
   LevelOther otherLevel -> otherLevelToHandle otherLevel
 
--- $intro
+-- $synopsis
 --
--- This module...
+-- @monad-logger-aeson@ provides structured JSON logging using @monad-logger@'s
+-- interface. Specifically, it is intended to be a (largely) drop-in replacement
+-- for @monad-logger@'s "Control.Monad.Logger.CallStack" module.
+--
+-- In brief, this program:
+--
+-- > {-# LANGUAGE BlockArguments #-}
+-- > {-# LANGUAGE OverloadedStrings #-}
+-- > module Main
+-- >   ( main
+-- >   ) where
+-- >
+-- > import Control.Monad.Logger.Aeson
+-- >
+-- > doStuff :: (MonadLogger m) => Int -> m ()
+-- > doStuff x = do
+-- >   logDebug $ "Doing stuff" :# ["x" .@ x]
+-- >
+-- > main :: IO ()
+-- > main = do
+-- >   runStdoutLoggingT do
+-- >     doStuff 42
+-- >     logInfo "Done"
+--
+-- Would produce this output (formatted for readability here with @jq@):
+--
+-- > {
+-- >   "time": "2022-05-15T20:52:15.5559417Z",
+-- >   "level": "debug",
+-- >   "location": {
+-- >     "package": "main",
+-- >     "module": "Main",
+-- >     "file": "app/readme-example.hs",
+-- >     "line": 11,
+-- >     "char": 3
+-- >   },
+-- >   "message": {
+-- >     "text": "Doing stuff",
+-- >     "meta": {
+-- >       "x": 42
+-- >     }
+-- >   }
+-- > }
+-- > {
+-- >   "time": "2022-05-15T20:52:15.5560448Z",
+-- >   "level": "info",
+-- >   "location": {
+-- >     "package": "main",
+-- >     "module": "Main",
+-- >     "file": "app/readme-example.hs",
+-- >     "line": 17,
+-- >     "char": 5
+-- >   },
+-- >   "message": {
+-- >     "text": "Done"
+-- >   }
+-- > }
+--
+-- For additional detail on the library, please see the remainder of these
+-- Haddocks and the following external resources:
+--
+-- * [README](https://github.com/jship/monad-logger-aeson/blob/main/monad-logger-aeson/README.md)
+-- * [Announcement blog post](https://jship.github.io)
