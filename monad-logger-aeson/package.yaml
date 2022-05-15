@@ -9,6 +9,8 @@ category: System
 
 extra-source-files:
 - package.yaml
+- README.md
+- LICENSE.md
 
 ghc-options:
   - -Wall
