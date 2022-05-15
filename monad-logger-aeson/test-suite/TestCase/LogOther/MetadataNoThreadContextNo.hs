@@ -5,7 +5,7 @@ module TestCase.LogOther.MetadataNoThreadContextNo
   ( testCase
   ) where
 
-import Control.Monad.Logger.Aeson ((.@), Loc(..), LogLevel(..), LoggedMessage(..), logOther)
+import Control.Monad.Logger.Aeson (Loc(..), LogLevel(..), LoggedMessage(..), logOther)
 import Data.Aeson.QQ.Simple (aesonQQ)
 import Data.Time (UTCTime(..))
 import TestCase (TestCase(..))
@@ -29,9 +29,6 @@ testCase logFilePath =
               "line": 18,
               "char": 9
             },
-            "context": {
-              "tid": "ThreadId 1"
-            },
             "message": {
               "text": "No metadata"
             }
@@ -40,7 +37,6 @@ testCase logFilePath =
     , expectedPatch =
         [aesonQQ|
           [
-            { "op": "replace", "path": "/context/tid", "value": "ThreadId 1" },
             { "op": "replace", "path": "/time", "value": "2022-05-07T20:03:54.0000000Z" }
           ]
         |]
@@ -61,7 +57,7 @@ testCase logFilePath =
                 , loc_end = (0, 0)
                 }
           , loggedMessageLogSource = Nothing
-          , loggedMessageThreadContext = ["tid" .@ ("ThreadId 1" :: String)]
+          , loggedMessageThreadContext = []
           , loggedMessageMessage = "No metadata"
           }
     }

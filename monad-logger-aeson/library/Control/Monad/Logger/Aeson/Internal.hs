@@ -263,7 +263,7 @@ data OutputOptions = OutputOptions
   , -- | Controls whether or not the thread ID is included in each log message's
     -- thread context.
     --
-    -- Default: 'True'
+    -- Default: 'False'
     outputIncludeThreadId :: Bool
   , -- | Allows for setting a "base" thread context, i.e. a set of 'Pair' that
     -- will always be present in log messages.

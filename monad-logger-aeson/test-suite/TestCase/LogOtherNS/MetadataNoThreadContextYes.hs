@@ -35,7 +35,6 @@ testCase logFilePath =
             },
             "source": "tests",
             "context": {
-              "tid": "ThreadId 1",
               "reqId": "74ec1d0b"
             },
             "message": {
@@ -46,7 +45,6 @@ testCase logFilePath =
     , expectedPatch =
         [aesonQQ|
           [
-            { "op": "replace", "path": "/context/tid", "value": "ThreadId 1" },
             { "op": "replace", "path": "/time", "value": "2022-05-07T20:03:54.0000000Z" }
           ]
         |]
@@ -69,7 +67,6 @@ testCase logFilePath =
           , loggedMessageLogSource = Just "tests"
           , loggedMessageThreadContext =
               [ "reqId" .@ ("74ec1d0b" :: String)
-              , "tid" .@ ("ThreadId 1" :: String)
               ]
           , loggedMessageMessage = "No metadata"
           }

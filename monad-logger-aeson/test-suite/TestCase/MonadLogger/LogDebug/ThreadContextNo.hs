@@ -5,7 +5,7 @@ module TestCase.MonadLogger.LogDebug.ThreadContextNo
   ( testCase
   ) where
 
-import Control.Monad.Logger.Aeson ((.@), Loc(..), LogLevel(..), LoggedMessage(..))
+import Control.Monad.Logger.Aeson (Loc(..), LogLevel(..), LoggedMessage(..))
 import Data.Aeson.QQ.Simple (aesonQQ)
 import Data.Time (UTCTime(..))
 import TestCase (TestCase(..))
@@ -30,9 +30,6 @@ testCase logFilePath =
               "line": 19,
               "char": 9
             },
-            "context": {
-              "tid": "ThreadId 1"
-            },
             "message": {
               "text": "Logged from 'monad-logger'"
             }
@@ -41,7 +38,6 @@ testCase logFilePath =
     , expectedPatch =
         [aesonQQ|
           [
-            { "op": "replace", "path": "/context/tid", "value": "ThreadId 1" },
             { "op": "replace", "path": "/time", "value": "2022-05-07T20:03:54.0000000Z" }
           ]
         |]
@@ -62,7 +58,7 @@ testCase logFilePath =
                 , loc_end = (0, 0)
                 }
           , loggedMessageLogSource = Nothing
-          , loggedMessageThreadContext = ["tid" .@ ("ThreadId 1" :: String)]
+          , loggedMessageThreadContext = []
           , loggedMessageMessage = "Logged from 'monad-logger'"
           }
     }

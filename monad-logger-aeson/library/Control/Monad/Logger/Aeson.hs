@@ -330,7 +330,7 @@ defaultOutputOptions :: (LogLevel -> BS8.ByteString -> IO ()) -> OutputOptions
 defaultOutputOptions outputAction =
   OutputOptions
     { outputAction
-    , outputIncludeThreadId = True
+    , outputIncludeThreadId = False
     , outputBaseThreadContext = []
     }
 
