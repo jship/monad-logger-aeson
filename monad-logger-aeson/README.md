@@ -57,7 +57,7 @@ To this:
 import Control.Monad.Logger.Aeson
 ```
 
-We'll have one compiler error to address:
+In changing the import, we'll have one compiler error to address:
 
 ```text
 monad-logger-aeson/app/readme-example.hs:12:35: error:
@@ -77,8 +77,9 @@ Indicating that we need to provide the `logDebug` call a `Message` rather than a
 `Text` value. This compiler error gives us a choice depending upon our current
 time constraints: we can either go ahead and convert this `Text` value to a
 "proper" `Message` by moving the metadata it encodes into structured data (i.e.
-a `[Pair]` value), or we can defer doing that for now by tacking on an empty
-`[Pair]` value. We'll opt for the former here:
+a `[Pair]` value, where `Pair` is an `aeson` key and value), or we can defer
+doing that for now by tacking on an empty `[Pair]` value. We'll opt for the
+former here:
 
 ```haskell
 logDebug $ "Doing stuff" :# ["x" .@ x]
@@ -123,8 +124,8 @@ Our log output now looks like this (formatted for readability here with `jq`):
 }
 ```
 
-Voilà! Now our Haskell code is using structured logging. Our logs are now fit
-for parsing, ingestion into our log aggregation/anaysis service of choice, etc.
+Voilà! Now our Haskell code is using structured logging. Our logs are fit for
+parsing, ingestion into our log aggregation/analysis service of choice, etc.
 
 ## Goals
 
@@ -141,8 +142,8 @@ the other logging libraries' reverse dependency lists, and also consulting our
 personal experiences working on Haskell codebases, `monad-logger` would seem to
 be the most prevalent logging library in the wild. In developing our library as
 a drop-in replacement for `monad-logger`, we hope to empower Haskellers using
-this popular logging interface to be able to add structured logging to their
-programs with minimal fuss.
+this popular logging interface to add structured logging to their programs with
+minimal fuss.
 
 We believe we have achieved goal 2 by directly representing in-flight log
 messages using an `aeson` object `Encoding`, and by _never_ parsing these
