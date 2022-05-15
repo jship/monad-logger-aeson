@@ -14,8 +14,7 @@ For additional detail on the library, please see the [Haddocks][], the
 
 ## Crash course
 
-Assuming we have the following `monad-logger`-based application and library code
-(shown in the same snippet here for brevity's sake):
+Assuming we have the following `monad-logger`-based code:
 
 ```haskell
 {-# LANGUAGE BlockArguments #-}
