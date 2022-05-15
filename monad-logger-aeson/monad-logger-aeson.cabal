@@ -6,8 +6,12 @@ cabal-version: 1.12
 
 name:           monad-logger-aeson
 version:        0.0.0.0
-synopsis:       monad-logger-aeson synopsis
-description:    monad-logger-aeson description
+synopsis:       JSON logging using monad-logger interface
+description:    @monad-logger-aeson@ provides structured JSON logging using @monad-logger@'s
+                interface.
+                .
+                Specifically, it is intended to be a (largely) drop-in replacement for
+                @monad-logger@'s "Control.Monad.Logger.CallStack" module.
 category:       System
 author:         Jason Shipman
 maintainer:     Jason Shipman
