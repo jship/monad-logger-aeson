@@ -174,5 +174,5 @@ that benchmarks do not yet exist for this library.  Caveat emptor!
 [Version badge]: https://img.shields.io/hackage/v/monad-logger-aeson?color=brightgreen&label=version&logo=haskell
 [version]: https://hackage.haskell.org/package/monad-logger-aeson
 [Haddocks]: https://hackage.haskell.org/package/monad-logger-aeson
-[announcement blog post]: https://jship.github.io
+[announcement blog post]: https://jship.github.io/posts/2022-05-17-announcing-monad-logger-aeson/
 [reverse dependency list]: https://packdeps.haskellers.com/reverse/monad-logger

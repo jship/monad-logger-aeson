@@ -514,4 +514,4 @@ defaultHandleFromLevel otherLevelToHandle = \case
 -- Haddocks and the following external resources:
 --
 -- * [README](https://github.com/jship/monad-logger-aeson/blob/main/monad-logger-aeson/README.md)
--- * [Announcement blog post](https://jship.github.io)
+-- * [Announcement blog post](https://jship.github.io/posts/2022-05-17-announcing-monad-logger-aeson/)
