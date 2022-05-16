@@ -20,7 +20,6 @@ module Control.Monad.Logger.Aeson.Internal
   , OutputOptions(..)
   , defaultLogStrBS
   , defaultLogStrLBS
-  , messageToLogStr
   , messageEncoding
   , messageSeries
 
@@ -29,8 +28,6 @@ module Control.Monad.Logger.Aeson.Internal
   , logItemEncoding
 
     -- ** Encoding-related
-  , xonCharLogStr
-  , xonChar
   , pairsEncoding
   , pairsSeries
   , levelEncoding
@@ -63,7 +60,6 @@ import qualified Data.ByteString.Builder as Builder
 import qualified Data.ByteString.Char8 as BS8
 import qualified Data.ByteString.Lazy as LBS
 import qualified Data.ByteString.Lazy.Char8 as LBS8
-import qualified Data.Char as Char
 import qualified Data.HashMap.Strict as HashMap
 import qualified Data.Maybe as Maybe
 import qualified Data.String as String
@@ -248,6 +244,9 @@ infixr 5 :#
 instance IsString Message where
   fromString string = Text.pack string :# []
 
+instance ToLogStr Message where
+  toLogStr = toLogStr . Aeson.encodingToLazyByteString . messageEncoding
+
 -- | Thread-safe, global 'Store' that captures the thread context of messages.
 --
 -- Note that there is a bit of somewhat unavoidable name-overloading here: this
@@ -324,24 +323,15 @@ defaultLogStrLBS now threadContext loc logSource logLevel logStr =
   where
   logItem :: LogItem
   logItem =
-    case LBS8.uncons logStrLBS of
-      Nothing ->
+    case LBS8.take 9 logStrLBS of
+      "{\"text\":\"" ->
+        mkLogItem
+          $ Aeson.unsafeToEncoding
+          $ Builder.lazyByteString logStrLBS
+      _ ->
         mkLogItem
           $ messageEncoding
-          $ Text.empty :# []
-      Just (c, lbs) ->
-        -- If the first character of the log string is a XON byte, then we
-        -- assume the log string (minus the XON byte) is an encoded 'Message'.
-        if c == xonChar then
-          mkLogItem
-            $ Aeson.unsafeToEncoding
-            $ Builder.lazyByteString lbs
-        -- Otherwise, we make no assumptions of the log string. We simply decode
-        -- to text and use this text in a metadata-less 'Message'.
-        else
-          mkLogItem
-            $ messageEncoding
-            $ decodeLenient logStrLBS :# []
+          $ decodeLenient logStrLBS :# []
 
   mkLogItem :: Encoding -> LogItem
   mkLogItem messageEnc =
@@ -369,14 +359,7 @@ logCS
   -> Message
   -> m ()
 logCS cs logSource logLevel msg =
-  monadLoggerLog (locFromCS cs) logSource logLevel
-    $ xonCharLogStr <> messageToLogStr msg
-
-xonCharLogStr :: LogStr
-xonCharLogStr = toLogStr $ LBS8.singleton $ xonChar
-
-xonChar :: Char
-xonChar = Char.chr 17
+  monadLoggerLog (locFromCS cs) logSource logLevel $ toLogStr msg
 
 data LogItem = LogItem
   { logItemTimestamp :: UTCTime
@@ -417,9 +400,6 @@ logItemEncoding logItem =
     , logItemThreadContext
     , logItemMessageEncoding
     } = logItem
-
-messageToLogStr :: Message -> LogStr
-messageToLogStr = toLogStr . Aeson.encodingToLazyByteString . messageEncoding
 
 messageEncoding :: Message -> Encoding
 messageEncoding  = Aeson.pairs . messageSeries

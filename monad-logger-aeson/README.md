@@ -144,20 +144,29 @@ a (largely) drop-in replacement for `monad-logger`, we hope to empower
 Haskellers using this popular logging interface to add structured logging to
 their programs with minimal fuss.
 
-We believe we have achieved goal 2 by directly representing in-flight log
-messages using an `aeson` object `Encoding`, by _never_ converting anything to
-intermediate `Value`s, and by _never_ parsing these in-flight log messages when
-assembling the final logged message. Regarding the latter point, a more
-straightforward implementation would attempt parsing of in-flight log messages
-to know whether they came from `monad-logger-aeson` or `monad-logger`. Rather
-than parse in-flight log messages, we leverage a simple-but-subtle tagging
-scheme on in-flight messages such that we can O(1) know whether or not an
-in-flight log message is a `monad-logger-aeson`-encoded message or a
-`monad-logger`-encoded message. When assembling the final logged message, we
-consult the tag to know how to incorprate the in-flight message's encoding into
-the final logged message's encoding. While we believe the principles described
-previously should provide good performance, please note that benchmarks do not
-yet exist for this library.  Caveat emptor!
+We believe we have achieved goal 2 by directly representing in-flight `Message`
+values using a fixed `aeson` object `Encoding`, by never (internally) converting
+anything to intermediate `Value`s, and by never parsing these in-flight log
+messages when assembling the final logged message. Regarding the latter point,
+we need to know the origin of an input `LogStr` (i.e. is it from
+`monad-logger-aeson` or not?). If we know an input `LogStr` came from
+`monad-logger-aeson`, then we know the `LogStr` is an `aeson` object `Encoding`
+of a `Message`, and so we can pass this encoding along untouched as a piece of
+the final log message's encoding. If we know an input `LogStr` did not come from
+`monad-logger-aeson`, then we can scoop this `LogStr` up into a text-only
+`Message`, encode that, and pass the encoding along as a piece of the final log
+message's encoding. A straightforward and relatively expensive implementation of
+determining a `LogStr`'s origin would involve parsing of in-flight log messages
+back into `Message` values. Rather than resort to parsing _every_ in-flight
+message, we simply check the first 9 characters of the `LogStr` for a match with
+`{"text":"`. Yes, there is the possibility that a `monad-logger` user logs out a
+`LogStr` with this same prefix and that `LogStr` makes its way into a
+`monad-logger-aeson` user's `LoggingT` runner function.  This wwould cause
+`monad-logger-aeson` to erroneously assume the message's origin is
+`monad-logger-aeson`. We feel this possibility is unlikely, and have accepted
+this as a tradeoff in the design space of the library. While we believe the
+principles described previously should provide good performance, please note
+that benchmarks do not yet exist for this library.  Caveat emptor!
 
 [monad-logger-aeson]: https://github.com/jship/monad-logger-aeson
 [Build badge]: https://github.com/jship/monad-logger-aeson/workflows/CI/badge.svg
