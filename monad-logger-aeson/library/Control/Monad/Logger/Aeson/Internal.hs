@@ -101,7 +101,7 @@ type Key = Text
 data LoggedMessage = LoggedMessage
   { loggedMessageTimestamp :: UTCTime
   , loggedMessageLevel :: LogLevel
-  , loggedMessageLoc :: Maybe Loc -- TODO: Add some tests using @monad-logger@ stuff to check this
+  , loggedMessageLoc :: Maybe Loc
   , loggedMessageLogSource :: Maybe LogSource
   , loggedMessageThreadContext :: [Pair]
   , loggedMessageMessage :: Message

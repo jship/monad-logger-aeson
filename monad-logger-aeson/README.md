@@ -145,8 +145,9 @@ Haskellers using this popular logging interface to add structured logging to
 their programs with minimal fuss.
 
 We believe we have achieved goal 2 by directly representing in-flight log
-messages using an `aeson` object `Encoding`, and by _never_ parsing these
-in-flight log messages when assembling the final logged message. A more
+messages using an `aeson` object `Encoding`, by _never_ converting anything to
+intermediate `Value`s, and by _never_ parsing these in-flight log messages when
+assembling the final logged message. Regarding the latter point, a more
 straightforward implementation would attempt parsing of in-flight log messages
 to know whether they came from `monad-logger-aeson` or `monad-logger`. Rather
 than parse in-flight log messages, we leverage a simple-but-subtle tagging
@@ -156,7 +157,7 @@ in-flight log message is a `monad-logger-aeson`-encoded message or a
 consult the tag to know how to incorprate the in-flight message's encoding into
 the final logged message's encoding. While we believe the principles described
 previously should provide good performance, please note that benchmarks do not
-yet exist for this library. Caveat emptor!
+yet exist for this library.  Caveat emptor!
 
 [monad-logger-aeson]: https://github.com/jship/monad-logger-aeson
 [Build badge]: https://github.com/jship/monad-logger-aeson/workflows/CI/badge.svg
