@@ -161,11 +161,11 @@ back into `Message` values. Rather than resort to parsing _every_ in-flight
 message, we simply check the first 9 characters of the `LogStr` for a match with
 `{"text":"`. Yes, there is the possibility that a `monad-logger` user logs out a
 `LogStr` with this same prefix and that `LogStr` makes its way into a
-`monad-logger-aeson` user's `LoggingT` runner function.  This wwould cause
+`monad-logger-aeson` user's `LoggingT` runner function.  This would cause
 `monad-logger-aeson` to erroneously assume the message's origin is
-`monad-logger-aeson`. We feel this possibility is unlikely, and have accepted
-this as a tradeoff in the design space of the library. While we believe the
-principles described previously should provide good performance, please note
+`monad-logger-aeson`. We feel this possibility is overall unlikely, and have
+accepted this as a tradeoff in the design space of the library. While we believe
+the principles described previously should provide good performance, please note
 that benchmarks do not yet exist for this library.  Caveat emptor!
 
 [monad-logger-aeson]: https://github.com/jship/monad-logger-aeson
