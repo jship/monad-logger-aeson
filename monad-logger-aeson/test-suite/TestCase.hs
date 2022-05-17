@@ -47,6 +47,8 @@ runTest testCase = do
               expectationFailure $ "LoggedMessage parse failed: " <> errStr
             Success actualLoggedMessage -> do
               actualLoggedMessage `shouldBe` expectedLoggedMessage
+              Aeson.toJSON actualLoggedMessage `shouldBe` Aeson.toJSON expectedLoggedMessage
+              Aeson.toEncoding actualLoggedMessage `shouldBe` Aeson.toEncoding expectedLoggedMessage
   where
   TestCase
     { actionUnderTest
