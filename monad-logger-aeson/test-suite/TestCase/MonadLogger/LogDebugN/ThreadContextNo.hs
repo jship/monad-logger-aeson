@@ -9,6 +9,7 @@ import Control.Monad.Logger.Aeson (LogLevel(..), LoggedMessage(..))
 import Data.Aeson.QQ.Simple (aesonQQ)
 import Data.Time (UTCTime(..))
 import TestCase (TestCase(..))
+import qualified Control.Monad.Logger.Aeson.Internal as Internal
 import qualified Control.Monad.Logger.CallStack as ML
 import qualified Data.Time as Time
 
@@ -44,7 +45,8 @@ testCase logFilePath =
           , loggedMessageLevel = LevelDebug
           , loggedMessageLoc = Nothing
           , loggedMessageLogSource = Nothing
-          , loggedMessageThreadContext = []
-          , loggedMessageMessage = "Logged from 'monad-logger'"
+          , loggedMessageThreadContext = Internal.emptyKeyMap
+          , loggedMessageText = "Logged from 'monad-logger'"
+          , loggedMessageMeta = Internal.emptyKeyMap
           }
     }

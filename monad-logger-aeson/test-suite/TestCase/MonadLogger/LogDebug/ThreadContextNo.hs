@@ -9,6 +9,7 @@ import Control.Monad.Logger.Aeson (Loc(..), LogLevel(..), LoggedMessage(..))
 import Data.Aeson.QQ.Simple (aesonQQ)
 import Data.Time (UTCTime(..))
 import TestCase (TestCase(..))
+import qualified Control.Monad.Logger.Aeson.Internal as Internal
 import qualified Control.Monad.Logger.CallStack as ML
 import qualified Data.Time as Time
 
@@ -27,7 +28,7 @@ testCase logFilePath =
               "package": "main",
               "module": "TestCase.MonadLogger.LogDebug.ThreadContextNo",
               "file": "test-suite/TestCase/MonadLogger/LogDebug/ThreadContextNo.hs",
-              "line": 19,
+              "line": 20,
               "char": 9
             },
             "message": {
@@ -54,11 +55,12 @@ testCase logFilePath =
                 { loc_package = "main"
                 , loc_module = "TestCase.MonadLogger.LogDebug.ThreadContextNo"
                 , loc_filename = "test-suite/TestCase/MonadLogger/LogDebug/ThreadContextNo.hs"
-                , loc_start = (19, 9)
+                , loc_start = (20, 9)
                 , loc_end = (0, 0)
                 }
           , loggedMessageLogSource = Nothing
-          , loggedMessageThreadContext = []
-          , loggedMessageMessage = "Logged from 'monad-logger'"
+          , loggedMessageThreadContext = Internal.emptyKeyMap
+          , loggedMessageText = "Logged from 'monad-logger'"
+          , loggedMessageMeta = Internal.emptyKeyMap
           }
     }

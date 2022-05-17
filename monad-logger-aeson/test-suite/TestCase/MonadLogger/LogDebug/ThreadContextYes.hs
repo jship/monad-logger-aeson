@@ -10,6 +10,7 @@ import Control.Monad.Logger.Aeson ((.@), Loc(..), LogLevel(..), LoggedMessage(..
 import Data.Aeson.QQ.Simple (aesonQQ)
 import Data.Time (UTCTime(..))
 import TestCase (TestCase(..))
+import qualified Control.Monad.Logger.Aeson.Internal as Internal
 import qualified Control.Monad.Logger.CallStack as ML
 import qualified Data.Time as Time
 
@@ -29,7 +30,7 @@ testCase logFilePath =
               "package": "main",
               "module": "TestCase.MonadLogger.LogDebug.ThreadContextYes",
               "file": "test-suite/TestCase/MonadLogger/LogDebug/ThreadContextYes.hs",
-              "line": 21,
+              "line": 22,
               "char": 11
             },
             "context": {
@@ -59,13 +60,15 @@ testCase logFilePath =
                 { loc_package = "main"
                 , loc_module = "TestCase.MonadLogger.LogDebug.ThreadContextYes"
                 , loc_filename = "test-suite/TestCase/MonadLogger/LogDebug/ThreadContextYes.hs"
-                , loc_start = (21, 11)
+                , loc_start = (22, 11)
                 , loc_end = (0, 0)
                 }
           , loggedMessageLogSource = Nothing
           , loggedMessageThreadContext =
-              [ "reqId" .@ ("74ec1d0b" :: String)
-              ]
-          , loggedMessageMessage = "Logged from 'monad-logger'"
+              Internal.keyMapFromList
+                [ "reqId" .@ ("74ec1d0b" :: String)
+                ]
+          , loggedMessageText = "Logged from 'monad-logger'"
+          , loggedMessageMeta = Internal.emptyKeyMap
           }
     }

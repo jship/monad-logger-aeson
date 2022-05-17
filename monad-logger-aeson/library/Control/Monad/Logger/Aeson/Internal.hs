@@ -37,15 +37,23 @@ module Control.Monad.Logger.Aeson.Internal
   , mkLoggerLoc
   , locFromCS
   , isDefaultLoc
+
+    -- ** Aeson compat
+  , Key
+  , KeyMap
+  , emptyKeyMap
+  , keyMapFromList
+  , keyMapToList
+  , keyMapInsert
+  , keyMapUnion
   ) where
 
 import Context (Store)
 import Control.Applicative (Applicative(liftA2))
 import Control.Monad.Logger (Loc(..), LogLevel(..), MonadLogger(..), ToLogStr(..), LogSource)
-import Data.Aeson (KeyValue((.=)), (.:), (.:?), Encoding, FromJSON, ToJSON, Value)
+import Data.Aeson (KeyValue((.=)), Value(Object), (.:), (.:?), Encoding, FromJSON, ToJSON)
 import Data.Aeson.Encoding.Internal (Series(..))
 import Data.Aeson.Types (Pair, Parser)
-import Data.HashMap.Strict (HashMap)
 import Data.String (IsString)
 import Data.Text (Text)
 import Data.Time (UTCTime)
@@ -60,7 +68,6 @@ import qualified Data.ByteString.Builder as Builder
 import qualified Data.ByteString.Char8 as BS8
 import qualified Data.ByteString.Lazy as LBS
 import qualified Data.ByteString.Lazy.Char8 as LBS8
-import qualified Data.HashMap.Strict as HashMap
 import qualified Data.Maybe as Maybe
 import qualified Data.String as String
 import qualified Data.Text as Text
@@ -70,11 +77,29 @@ import qualified System.IO.Unsafe as IO.Unsafe
 
 #if MIN_VERSION_aeson(2, 0, 0)
 import Data.Aeson.Key (Key)
-import qualified Data.Aeson.KeyMap as AesonCompat (toList)
+import Data.Aeson.KeyMap (KeyMap)
+import qualified Data.Aeson.KeyMap as AesonCompat
 #else
-import qualified Data.HashMap.Strict as AesonCompat (toList)
+import Data.HashMap.Strict (HashMap)
+import qualified Data.HashMap.Strict as AesonCompat
 type Key = Text
+type KeyMap v = HashMap Key v
 #endif
+
+emptyKeyMap :: KeyMap v
+emptyKeyMap = AesonCompat.empty
+
+keyMapFromList :: [(Key, v)] -> KeyMap v
+keyMapFromList = AesonCompat.fromList
+
+keyMapToList :: KeyMap v -> [(Key, v)]
+keyMapToList = AesonCompat.toList
+
+keyMapInsert :: Key -> v -> KeyMap v -> KeyMap v
+keyMapInsert = AesonCompat.insert
+
+keyMapUnion :: KeyMap v -> KeyMap v -> KeyMap v
+keyMapUnion = AesonCompat.union
 
 -- | Synonym for '.=' from @aeson@.
 --
@@ -99,19 +124,28 @@ data LoggedMessage = LoggedMessage
   , loggedMessageLevel :: LogLevel
   , loggedMessageLoc :: Maybe Loc
   , loggedMessageLogSource :: Maybe LogSource
-  , loggedMessageThreadContext :: [Pair]
-  , loggedMessageMessage :: Message
+  , loggedMessageThreadContext :: KeyMap Value
+  , loggedMessageText :: Text
+  , loggedMessageMeta :: KeyMap Value
   } deriving stock (Eq, Generic, Ord, Show)
 
 instance FromJSON LoggedMessage where
-  parseJSON = Aeson.withObject "LoggedMessage" \obj ->
-    LoggedMessage
-      <$> obj .: "time"
-      <*> fmap logLevelFromText (obj .: "level")
-      <*> (obj .:? "location" >>= parseLoc)
-      <*> obj .:? "source"
-      <*> (obj .:? "context" >>= parsePairs)
-      <*> (obj .: "message" >>= parseMessage)
+  parseJSON = Aeson.withObject "LoggedMessage" \obj -> do
+    loggedMessageTimestamp <- obj .: "time"
+    loggedMessageLevel <- fmap logLevelFromText $ obj .: "level"
+    loggedMessageLoc <- parseLoc =<< obj .:? "location"
+    loggedMessageLogSource <- obj .:? "source"
+    loggedMessageThreadContext <- parsePairs =<< obj .:? "context"
+    (loggedMessageText, loggedMessageMeta) <- parseMessage =<< obj .: "message"
+    pure LoggedMessage
+      { loggedMessageTimestamp
+      , loggedMessageLevel
+      , loggedMessageLoc
+      , loggedMessageLogSource
+      , loggedMessageThreadContext
+      , loggedMessageText
+      , loggedMessageMeta
+      }
     where
     logLevelFromText :: Text -> LogLevel
     logLevelFromText = \case
@@ -131,17 +165,15 @@ instance FromJSON LoggedMessage where
           <*> (liftA2 (,) (obj .: "line") (obj .: "char"))
           <*> pure (0, 0)
 
-    parsePairs :: Maybe Value -> Parser [Pair]
+    parsePairs :: Maybe Value -> Parser (KeyMap Value)
     parsePairs = \case
-      Nothing -> pure []
+      Nothing -> pure mempty
       Just value -> flip (Aeson.withObject "[Pair]") value \obj -> do
-        pure $ AesonCompat.toList obj
+        pure obj
 
-    parseMessage :: Value -> Parser Message
+    parseMessage :: Value -> Parser (Text, KeyMap Value)
     parseMessage = Aeson.withObject "Message" \obj ->
-      (:#)
-        <$> obj .: "text"
-        <*> (obj .:? "meta" >>= parsePairs)
+      (,) <$> obj .: "text" <*> (parsePairs =<< obj .:? "meta")
 
 instance ToJSON LoggedMessage where
   toJSON loggedMessage =
@@ -154,10 +186,11 @@ instance ToJSON LoggedMessage where
       , case loggedMessageLogSource of
           Nothing -> Nothing
           Just logSource -> Just $ "source" .@ logSource
-      , case loggedMessageThreadContext of
-          [] -> Nothing
-          pairs -> Just $ "context" .@ Aeson.object pairs
-      , Just $ "message" .@ messageToJSON loggedMessageMessage
+      , if loggedMessageThreadContext == mempty then
+          Nothing
+        else
+          Just $ "context" .@ Object loggedMessageThreadContext
+      , Just $ "message" .@ messageJSON
       ]
     where
     locToJSON :: Loc -> Value
@@ -172,13 +205,14 @@ instance ToJSON LoggedMessage where
       where
       Loc { loc_filename, loc_package, loc_module, loc_start } = loc
 
-    messageToJSON :: Message -> Value
-    messageToJSON (messageText :# messageMeta) =
+    messageJSON :: Value
+    messageJSON =
       Aeson.object $ Maybe.catMaybes
-        [ Just $ "text" .@ messageText
-        , case messageMeta of
-            [] -> Nothing
-            pairs -> Just $ "meta" .@ Aeson.object pairs
+        [ Just $ "text" .@ loggedMessageText
+        , if loggedMessageMeta == mempty then
+            Nothing
+          else
+            Just $ "meta" .@ Object loggedMessageMeta
         ]
 
     LoggedMessage
@@ -187,7 +221,8 @@ instance ToJSON LoggedMessage where
       , loggedMessageLoc
       , loggedMessageLogSource
       , loggedMessageThreadContext
-      , loggedMessageMessage
+      , loggedMessageText
+      , loggedMessageMeta
       } = loggedMessage
 
   toEncoding loggedMessage = logItemEncoding logItem
@@ -199,8 +234,14 @@ instance ToJSON LoggedMessage where
         , logItemLogSource = Maybe.fromMaybe "" loggedMessageLogSource
         , logItemLevel = loggedMessageLevel
         , logItemThreadContext = loggedMessageThreadContext
-        , logItemMessageEncoding = messageEncoding loggedMessageMessage
+        , logItemMessageEncoding =
+            messageEncoding $
+              loggedMessageText :# keyMapToSeriesList loggedMessageMeta
         }
+
+    keyMapToSeriesList :: KeyMap Value -> [Series]
+    keyMapToSeriesList =
+      fmap (uncurry Aeson.pair . fmap Aeson.toEncoding) . keyMapToList
 
     LoggedMessage
       { loggedMessageTimestamp
@@ -208,11 +249,12 @@ instance ToJSON LoggedMessage where
       , loggedMessageLoc
       , loggedMessageLogSource
       , loggedMessageThreadContext
-      , loggedMessageMessage
+      , loggedMessageText
+      , loggedMessageMeta
       } = loggedMessage
 
 -- | A 'Message' captures a textual component and a metadata component. The
--- metadata component is a list of 'Pair' to support tacking on arbitrary
+-- metadata component is a list of 'Series' to support tacking on arbitrary
 -- structured data to a log message.
 --
 -- With the @OverloadedStrings@ extension enabled, 'Message' values can be
@@ -237,8 +279,7 @@ instance ToJSON LoggedMessage where
 -- helps!
 --
 -- @since 0.1.0.0
-data Message = Text :# [Pair]
-  deriving stock (Eq, Generic, Ord, Show)
+data Message = Text :# [Series]
 infixr 5 :#
 
 instance IsString Message where
@@ -257,12 +298,12 @@ instance ToLogStr Message where
 -- don't hate the player!
 --
 -- @since 0.1.0.0
-threadContextStore :: Store (HashMap Key Value)
+threadContextStore :: Store (KeyMap Value)
 threadContextStore =
   IO.Unsafe.unsafePerformIO
     $ Context.newStore Context.noPropagation
     $ Just
-    $ HashMap.empty
+    $ emptyKeyMap
 {-# NOINLINE threadContextStore #-}
 
 -- | 'OutputOptions' is for use with
@@ -300,7 +341,7 @@ data OutputOptions = OutputOptions
 
 defaultLogStrBS
   :: UTCTime
-  -> [Pair]
+  -> KeyMap Value
   -> Loc
   -> LogSource
   -> LogLevel
@@ -312,7 +353,7 @@ defaultLogStrBS now threadContext loc logSource logLevel logStr =
 
 defaultLogStrLBS
   :: UTCTime
-  -> [Pair]
+  -> KeyMap Value
   -> Loc
   -> LogSource
   -> LogLevel
@@ -366,7 +407,7 @@ data LogItem = LogItem
   , logItemLoc :: Loc
   , logItemLogSource :: LogSource
   , logItemLevel :: LogLevel
-  , logItemThreadContext :: [Pair]
+  , logItemThreadContext :: KeyMap Value
   , logItemMessageEncoding :: Encoding
   }
 
@@ -388,7 +429,7 @@ logItemEncoding logItem =
       <> ( if null logItemThreadContext then
              mempty
            else
-             Aeson.pairStr "context" $ pairsEncoding logItemThreadContext
+             Aeson.pairStr "context" $ Aeson.toEncoding logItemThreadContext
          )
       <> (Aeson.pairStr "message" logItemMessageEncoding)
   where
@@ -410,7 +451,7 @@ messageSeries message =
     <> ( if null messageMeta then
            mempty
          else
-           Aeson.pairStr "meta" $ pairsEncoding messageMeta
+           Aeson.pairStr "meta" $ Aeson.pairs $ mconcat messageMeta
        )
   where
   messageText :# messageMeta = message

@@ -7,7 +7,7 @@ module TestCase
   , withTempLogFile
   ) where
 
-import Control.Monad.Logger.Aeson (LoggedMessage(..), Message(..), LoggingT, runFileLoggingT)
+import Control.Monad.Logger.Aeson (LoggedMessage(..), LoggingT, runFileLoggingT)
 import Data.Aeson (Result(..), Value)
 import Data.Aeson.Diff (Patch(..))
 import GHC.Stack (HasCallStack)
@@ -17,7 +17,6 @@ import qualified Control.Exception as Exception
 import qualified Data.Aeson as Aeson
 import qualified Data.Aeson.Diff as Diff
 import qualified Data.ByteString.Char8 as BS8
-import qualified Data.List as List
 import qualified System.Directory as Directory
 import qualified System.IO as IO
 
@@ -47,7 +46,7 @@ runTest testCase = do
             Error errStr -> do
               expectationFailure $ "LoggedMessage parse failed: " <> errStr
             Success actualLoggedMessage -> do
-              actualLoggedMessage `shouldMatchLoggedMessage` expectedLoggedMessage
+              actualLoggedMessage `shouldBe` expectedLoggedMessage
   where
   TestCase
     { actionUnderTest
@@ -69,22 +68,6 @@ withTempLogFile f = do
 shouldMatchWithPatch :: (HasCallStack) => Value -> (Value, Patch) -> Expectation
 shouldMatchWithPatch actualValue (expectedValue, expectedPatch) = do
   Diff.diff actualValue expectedValue `shouldBe` expectedPatch
-
-shouldMatchLoggedMessage
-  :: (HasCallStack)
-  => LoggedMessage
-  -> LoggedMessage
-  -> Expectation
-shouldMatchLoggedMessage x y =
-  sortPairs x `shouldBe` sortPairs y
-  where
-  sortPairs lm =
-    lm
-      { loggedMessageThreadContext = List.sort $ loggedMessageThreadContext lm
-      , loggedMessageMessage =
-          case loggedMessageMessage lm of
-            messageText :# messageMeta -> messageText :# List.sort messageMeta
-      }
 
 clearFile :: FilePath -> IO ()
 clearFile filePath = IO.withFile filePath WriteMode $ flip IO.hSetFileSize 0

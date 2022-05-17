@@ -9,6 +9,7 @@ import Control.Monad.Logger.Aeson ((.@), Loc(..), LogLevel(..), LoggedMessage(..
 import Data.Aeson.QQ.Simple (aesonQQ)
 import Data.Time (UTCTime(..))
 import TestCase (TestCase(..))
+import qualified Control.Monad.Logger.Aeson.Internal as Internal
 import qualified Data.Time as Time
 
 testCase :: FilePath -> TestCase
@@ -29,7 +30,7 @@ testCase logFilePath =
               "package": "main",
               "module": "TestCase.LogInfoNS.MetadataYesThreadContextNo",
               "file": "test-suite/TestCase/LogInfoNS/MetadataYesThreadContextNo.hs",
-              "line": 18,
+              "line": 19,
               "char": 9
             },
             "source": "tests",
@@ -61,14 +62,16 @@ testCase logFilePath =
                 { loc_package = "main"
                 , loc_module = "TestCase.LogInfoNS.MetadataYesThreadContextNo"
                 , loc_filename = "test-suite/TestCase/LogInfoNS/MetadataYesThreadContextNo.hs"
-                , loc_start = (18, 9)
+                , loc_start = (19, 9)
                 , loc_end = (0, 0)
                 }
           , loggedMessageLogSource = Just "tests"
-          , loggedMessageThreadContext = []
-          , loggedMessageMessage = "With metadata" :#
-              [ "a" .@ (42 :: Int)
-              , "b" .@ ("x" :: String)
-              ]
+          , loggedMessageThreadContext = Internal.emptyKeyMap
+          , loggedMessageText = "With metadata"
+          , loggedMessageMeta =
+              Internal.keyMapFromList
+                [ "a" .@ (42 :: Int)
+                , "b" .@ ("x" :: String)
+                ]
           }
     }

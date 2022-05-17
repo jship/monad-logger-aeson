@@ -87,7 +87,9 @@ import Control.Monad.Logger as Log hiding
 
 import Control.Monad.Catch (MonadMask, MonadThrow)
 import Control.Monad.IO.Class (MonadIO(liftIO))
-import Control.Monad.Logger.Aeson.Internal (LoggedMessage(..), Message(..), OutputOptions(..), (.@))
+import Control.Monad.Logger.Aeson.Internal
+  ( LoggedMessage(..), Message(..), OutputOptions(..), (.@), KeyMap
+  )
 import Data.Aeson (Value(String))
 import Data.Aeson.Types (Pair)
 import Data.Text (Text)
@@ -103,7 +105,6 @@ import qualified Control.Concurrent as Concurrent
 import qualified Control.Monad.Catch as Catch
 import qualified Control.Monad.Logger.Aeson.Internal as Internal
 import qualified Data.ByteString.Char8 as BS8
-import qualified Data.HashMap.Strict as HashMap
 import qualified Data.Text as Text
 import qualified Data.Time as Time
 import qualified System.Log.FastLogger as FastLogger
@@ -237,7 +238,7 @@ logOtherNS = Internal.logCS callStack
 withThreadContext :: (MonadIO m, MonadMask m) => [Pair] -> m a -> m a
 withThreadContext pairs =
   Context.adjust Internal.threadContextStore \pairsMap ->
-    HashMap.union (HashMap.fromList pairs) pairsMap
+    Internal.keyMapUnion (Internal.keyMapFromList pairs) pairsMap
 
 -- | This function lets us retrieve the calling thread's thread context. For
 -- more detail, we can consult the docs for 'withThreadContext'.
@@ -246,9 +247,9 @@ withThreadContext pairs =
 -- constraint, the library guarantees that 'myThreadContext' will never throw.
 --
 -- @since 0.1.0.0
-myThreadContext :: (MonadIO m, MonadThrow m) => m [Pair]
+myThreadContext :: (MonadIO m, MonadThrow m) => m (KeyMap Value)
 myThreadContext = do
-  Context.mines Internal.threadContextStore HashMap.toList
+  Context.mine Internal.threadContextStore
 
 -- | Run a block using a 'MonadLogger' instance which appends to the specified
 -- file.
@@ -352,18 +353,15 @@ defaultOutputWith outputOptions location logSource logLevel msg = do
   now <- Time.getCurrentTime
   threadIdText <- fmap (Text.pack . show) Concurrent.myThreadId
   threadContext <- Context.mines Internal.threadContextStore \hashMap ->
-    HashMap.toList
-      $ ( if outputIncludeThreadId then
-            HashMap.insert "tid" $ String threadIdText
-          else
-            id
-        )
-      $ HashMap.union hashMap
-      $ baseThreadContextHashMap
+    ( if outputIncludeThreadId then
+        Internal.keyMapInsert "tid" $ String threadIdText
+      else
+        id
+    ) $ Internal.keyMapUnion hashMap $ baseThreadContextHashMap
   outputAction logLevel
     $ Internal.defaultLogStrBS now threadContext location logSource logLevel msg
   where
-  baseThreadContextHashMap = HashMap.fromList outputBaseThreadContext
+  baseThreadContextHashMap = Internal.keyMapFromList outputBaseThreadContext
   OutputOptions
     { outputAction
     , outputIncludeThreadId
@@ -421,7 +419,7 @@ fastLoggerOutput loggerSet =
 -- | @since 0.1.0.0
 defaultLogStr
   :: UTCTime
-  -> [Pair]
+  -> KeyMap Value
   -> Loc
   -> LogSource
   -> LogLevel
