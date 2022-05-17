@@ -1,5 +1,8 @@
 name: monad-logger-aeson
-version: '0.0.0.0'
+version: '0.1.0.0'
+github: "jship/monad-logger-aeson"
+license: MIT
+license-file: LICENSE.md
 copyright: 2022 (c) Jason Shipman
 author: "Jason Shipman"
 maintainer: "Jason Shipman"

@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           monad-logger-aeson
-version:        0.0.0.0
+version:        0.1.0.0
 synopsis:       JSON logging using monad-logger interface
 description:    @monad-logger-aeson@ provides structured JSON logging using @monad-logger@'s
                 interface.
@@ -13,15 +13,23 @@ description:    @monad-logger-aeson@ provides structured JSON logging using @mon
                 Specifically, it is intended to be a (largely) drop-in replacement for
                 @monad-logger@'s "Control.Monad.Logger.CallStack" module.
 category:       System
+homepage:       https://github.com/jship/monad-logger-aeson#readme
+bug-reports:    https://github.com/jship/monad-logger-aeson/issues
 author:         Jason Shipman
 maintainer:     Jason Shipman
 copyright:      2022 (c) Jason Shipman
+license:        MIT
+license-file:   LICENSE.md
 build-type:     Simple
 extra-source-files:
     package.yaml
     README.md
     LICENSE.md
     CHANGELOG.md
+
+source-repository head
+  type: git
+  location: https://github.com/jship/monad-logger-aeson
 
 library
   exposed-modules:
