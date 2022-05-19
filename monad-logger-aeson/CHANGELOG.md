@@ -1,6 +1,6 @@
 # Change log
 
-## Future release
+## 0.2.0.0
 
 * Deprecate `(.@)` in favor of `(.=)` from `aeson`
 * Re-export `(.=)` from `aeson`
