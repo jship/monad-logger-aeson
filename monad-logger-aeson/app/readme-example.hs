@@ -8,7 +8,7 @@ import Control.Monad.Logger.Aeson
 
 doStuff :: (MonadLogger m) => Int -> m ()
 doStuff x = do
-  logDebug $ "Doing stuff" :# ["x" .@ x]
+  logDebug $ "Doing stuff" :# ["x" .= x]
 
 main :: IO ()
 main = do

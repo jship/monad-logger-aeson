@@ -55,6 +55,9 @@ module Control.Monad.Logger.Aeson
   , defaultLogStr
   , defaultHandleFromLevel
 
+    -- * Re-exports from @aeson@
+  , (.=)
+
     -- * Re-exports from @monad-logger@
   , module Log
   ) where
@@ -90,7 +93,7 @@ import Control.Monad.IO.Class (MonadIO(liftIO))
 import Control.Monad.Logger.Aeson.Internal
   ( LoggedMessage(..), Message(..), OutputOptions(..), (.@), KeyMap
   )
-import Data.Aeson (Value(String))
+import Data.Aeson (KeyValue((.=)), Value(String))
 import Data.Aeson.Types (Pair)
 import Data.Text (Text)
 import Data.Time (UTCTime)
@@ -219,14 +222,14 @@ logOtherNS = Internal.logCS callStack
 -- subsequently logged from our endpoint handler will automatically include that
 -- request ID:
 --
--- > import Control.Monad.Logger.Aeson ((.@), withThreadContext)
+-- > import Control.Monad.Logger.Aeson ((.=), withThreadContext)
 -- > import Network.Wai (Middleware)
 -- > import qualified Data.UUID.V4 as UUID
 -- >
 -- > addRequestId :: Middleware
 -- > addRequestId app = \request sendResponse -> do
 -- >   uuid <- UUID.nextRandom
--- >   withThreadContext ["requestId" .@ uuid] do
+-- >   withThreadContext ["requestId" .= uuid] do
 -- >     app request sendResponse
 --
 -- If we're coming from a Java background, it may be helpful for us to draw
@@ -466,7 +469,7 @@ defaultHandleFromLevel otherLevelToHandle = \case
 -- >
 -- > doStuff :: (MonadLogger m) => Int -> m ()
 -- > doStuff x = do
--- >   logDebug $ "Doing stuff" :# ["x" .@ x]
+-- >   logDebug $ "Doing stuff" :# ["x" .= x]
 -- >
 -- > main :: IO ()
 -- > main = do

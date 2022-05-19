@@ -5,7 +5,7 @@ module TestCase.LogInfoNS.MetadataYesThreadContextNo
   ( testCase
   ) where
 
-import Control.Monad.Logger.Aeson ((.@), Loc(..), LogLevel(..), LoggedMessage(..), Message(..), logInfoNS)
+import Control.Monad.Logger.Aeson ((.=), Loc(..), LogLevel(..), LoggedMessage(..), Message(..), logInfoNS)
 import Data.Aeson.QQ.Simple (aesonQQ)
 import Data.Time (UTCTime(..))
 import TestCase (TestCase(..))
@@ -17,8 +17,8 @@ testCase logFilePath =
   TestCase
     { actionUnderTest = do
         logInfoNS "tests" $ "With metadata" :#
-          [ "a" .@ (42 :: Int)
-          , "b" .@ ("x" :: String)
+          [ "a" .= (42 :: Int)
+          , "b" .= ("x" :: String)
           ]
     , logFilePath
     , expectedValue =
@@ -70,8 +70,8 @@ testCase logFilePath =
           , loggedMessageText = "With metadata"
           , loggedMessageMeta =
               Internal.keyMapFromList
-                [ "a" .@ (42 :: Int)
-                , "b" .@ ("x" :: String)
+                [ "a" .= (42 :: Int)
+                , "b" .= ("x" :: String)
                 ]
           }
     }

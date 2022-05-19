@@ -6,7 +6,7 @@ module TestCase.MonadLogger.LogDebugN.ThreadContextYes
   ( testCase
   ) where
 
-import Control.Monad.Logger.Aeson ((.@), LogLevel(..), LoggedMessage(..), withThreadContext)
+import Control.Monad.Logger.Aeson ((.=), LogLevel(..), LoggedMessage(..), withThreadContext)
 import Data.Aeson.QQ.Simple (aesonQQ)
 import Data.Time (UTCTime(..))
 import TestCase (TestCase(..))
@@ -18,7 +18,7 @@ testCase :: FilePath -> TestCase
 testCase logFilePath =
   TestCase
     { actionUnderTest = do
-        withThreadContext ["reqId" .@ ("74ec1d0b" :: String)] do
+        withThreadContext ["reqId" .= ("74ec1d0b" :: String)] do
           ML.logDebugN "Logged from 'monad-logger'"
     , logFilePath
     , expectedValue =
@@ -52,7 +52,7 @@ testCase logFilePath =
           , loggedMessageLogSource = Nothing
           , loggedMessageThreadContext =
               Internal.keyMapFromList
-                [ "reqId" .@ ("74ec1d0b" :: String)
+                [ "reqId" .= ("74ec1d0b" :: String)
                 ]
           , loggedMessageText = "Logged from 'monad-logger'"
           , loggedMessageMeta = Internal.emptyKeyMap

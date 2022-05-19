@@ -101,15 +101,15 @@ keyMapInsert = AesonCompat.insert
 keyMapUnion :: KeyMap v -> KeyMap v -> KeyMap v
 keyMapUnion = AesonCompat.union
 
--- | Synonym for '.=' from @aeson@.
+-- | Synonym for '(.=)' from @aeson@.
 --
--- We export this synonym rather than directly exporting '.=' to avoid clashing
--- if the user has open-imported both "Control.Monad.Logger.Aeson" and
--- "Data.Aeson".
+-- This operator is deprecated and will be removed in a future version. Please
+-- use '(.=)' instead, which is re-exported from "Data.Aeson".
 --
 -- @since 0.1.0.0
 (.@) :: (KeyValue kv, ToJSON v) => Key -> v -> kv
 (.@) = (.=)
+{-# DEPRECATED (.@) "This operator will be removed in a future major version." #-}
 
 -- | This type is the Haskell representation of each JSON log message produced
 -- by this library.
@@ -178,29 +178,29 @@ instance FromJSON LoggedMessage where
 instance ToJSON LoggedMessage where
   toJSON loggedMessage =
     Aeson.object $ Maybe.catMaybes
-      [ Just $ "time" .@ loggedMessageTimestamp
-      , Just $ "level" .@ logLevelToText loggedMessageLevel
+      [ Just $ "time" .= loggedMessageTimestamp
+      , Just $ "level" .= logLevelToText loggedMessageLevel
       , case loggedMessageLoc of
           Nothing -> Nothing
-          Just loc -> Just $ "location" .@ locToJSON loc
+          Just loc -> Just $ "location" .= locToJSON loc
       , case loggedMessageLogSource of
           Nothing -> Nothing
-          Just logSource -> Just $ "source" .@ logSource
+          Just logSource -> Just $ "source" .= logSource
       , if loggedMessageThreadContext == mempty then
           Nothing
         else
-          Just $ "context" .@ Object loggedMessageThreadContext
-      , Just $ "message" .@ messageJSON
+          Just $ "context" .= Object loggedMessageThreadContext
+      , Just $ "message" .= messageJSON
       ]
     where
     locToJSON :: Loc -> Value
     locToJSON loc =
       Aeson.object
-        [ "package" .@ loc_package
-        , "module" .@ loc_module
-        , "file" .@ loc_filename
-        , "line" .@ fst loc_start
-        , "char" .@ snd loc_start
+        [ "package" .= loc_package
+        , "module" .= loc_module
+        , "file" .= loc_filename
+        , "line" .= fst loc_start
+        , "char" .= snd loc_start
         ]
       where
       Loc { loc_filename, loc_package, loc_module, loc_start } = loc
@@ -208,11 +208,11 @@ instance ToJSON LoggedMessage where
     messageJSON :: Value
     messageJSON =
       Aeson.object $ Maybe.catMaybes
-        [ Just $ "text" .@ loggedMessageText
+        [ Just $ "text" .= loggedMessageText
         , if loggedMessageMeta == mempty then
             Nothing
           else
-            Just $ "meta" .@ Object loggedMessageMeta
+            Just $ "meta" .= Object loggedMessageMeta
         ]
 
     LoggedMessage
@@ -267,8 +267,8 @@ instance ToJSON LoggedMessage where
 --
 -- @
 -- 'Control.Monad.Logger.Aeson.logDebug' $ "Some log message with metadata" ':#'
---   [ "bloorp" '.@' (42 :: 'Int')
---   , "bonk" '.@' ("abc" :: 'Text')
+--   [ "bloorp" '.=' (42 :: 'Int')
+--   , "bonk" '.=' ("abc" :: 'Text')
 --   ]
 -- @
 --
@@ -447,7 +447,7 @@ messageEncoding  = Aeson.pairs . messageSeries
 
 messageSeries :: Message -> Series
 messageSeries message =
-  "text" .@ messageText
+  "text" .= messageText
     <> ( if null messageMeta then
            mempty
          else
@@ -460,7 +460,7 @@ pairsEncoding :: [Pair] -> Encoding
 pairsEncoding = Aeson.pairs . pairsSeries
 
 pairsSeries :: [Pair] -> Series
-pairsSeries = mconcat . fmap (uncurry (.@))
+pairsSeries = mconcat . fmap (uncurry (.=))
 
 levelEncoding :: LogLevel -> Encoding
 levelEncoding = Aeson.text . logLevelToText

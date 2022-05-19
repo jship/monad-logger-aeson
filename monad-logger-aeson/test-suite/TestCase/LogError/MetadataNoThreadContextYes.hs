@@ -7,7 +7,7 @@ module TestCase.LogError.MetadataNoThreadContextYes
   ) where
 
 import Control.Monad.Logger.Aeson
-  ( (.@), Loc(..), LogLevel(..), LoggedMessage(..), logError, withThreadContext
+  ( (.=), Loc(..), LogLevel(..), LoggedMessage(..), logError, withThreadContext
   )
 import Data.Aeson.QQ.Simple (aesonQQ)
 import Data.Time (UTCTime(..))
@@ -19,7 +19,7 @@ testCase :: FilePath -> TestCase
 testCase logFilePath =
   TestCase
     { actionUnderTest = do
-        withThreadContext ["reqId" .@ ("74ec1d0b" :: String)] do
+        withThreadContext ["reqId" .= ("74ec1d0b" :: String)] do
           logError "No metadata"
     , logFilePath
     , expectedValue =
@@ -67,7 +67,7 @@ testCase logFilePath =
           , loggedMessageLogSource = Nothing
           , loggedMessageThreadContext =
               Internal.keyMapFromList
-                [ "reqId" .@ ("74ec1d0b" :: String)
+                [ "reqId" .= ("74ec1d0b" :: String)
                 ]
           , loggedMessageText = "No metadata"
           , loggedMessageMeta = Internal.emptyKeyMap

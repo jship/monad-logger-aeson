@@ -7,7 +7,7 @@ module TestCase.LogError.MetadataYesThreadContextYes
   ) where
 
 import Control.Monad.Logger.Aeson
-  ( (.@), Loc(..), LogLevel(..), LoggedMessage(..), Message(..), logError, withThreadContext
+  ( (.=), Loc(..), LogLevel(..), LoggedMessage(..), Message(..), logError, withThreadContext
   )
 import Data.Aeson.QQ.Simple (aesonQQ)
 import Data.Time (UTCTime(..))
@@ -19,10 +19,10 @@ testCase :: FilePath -> TestCase
 testCase logFilePath =
   TestCase
     { actionUnderTest = do
-        withThreadContext ["reqId" .@ ("74ec1d0b" :: String)] do
+        withThreadContext ["reqId" .= ("74ec1d0b" :: String)] do
           logError $ "With metadata" :#
-            [ "a" .@ (42 :: Int)
-            , "b" .@ ("x" :: String)
+            [ "a" .= (42 :: Int)
+            , "b" .= ("x" :: String)
             ]
     , logFilePath
     , expectedValue =
@@ -74,13 +74,13 @@ testCase logFilePath =
           , loggedMessageLogSource = Nothing
           , loggedMessageThreadContext =
               Internal.keyMapFromList
-                [ "reqId" .@ ("74ec1d0b" :: String)
+                [ "reqId" .= ("74ec1d0b" :: String)
                 ]
           , loggedMessageText = "With metadata"
           , loggedMessageMeta =
               Internal.keyMapFromList
-                [ "a" .@ (42 :: Int)
-                , "b" .@ ("x" :: String)
+                [ "a" .= (42 :: Int)
+                , "b" .= ("x" :: String)
                 ]
           }
     }

@@ -81,7 +81,7 @@ or we can defer doing that for now by tacking on an empty `[Series]` value.
 We'll opt for the former here:
 
 ```haskell
-logDebug $ "Doing stuff" :# ["x" .@ x]
+logDebug $ "Doing stuff" :# ["x" .= x]
 ```
 
 Note that the `logInfo` call did not give us a compiler error, as `Message` has
