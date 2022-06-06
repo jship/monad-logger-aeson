@@ -1,0 +1,9 @@
+resolver: lts-16.31
+packages:
+- ./monad-logger-aeson
+extra-deps:
+- aeson-1.5.2.0
+- context-0.2.0.0
+- hspec-2.7.9
+- hspec-core-2.7.9
+- hspec-discover-2.7.9

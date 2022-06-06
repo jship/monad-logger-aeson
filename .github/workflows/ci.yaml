@@ -13,6 +13,7 @@ jobs:
         - nightly-2022-05-05  # ghc-9.2.2
         - lts-19.6  # ghc-9.0.2
         - lts-18.28  # ghc-8.10.7
+        - lts-16.31  # ghc-8.8.4
     env:
       RESOLVER: ${{ matrix.resolver }}
 
