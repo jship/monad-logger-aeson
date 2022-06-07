@@ -11,30 +11,16 @@ jobs:
         os: [ubuntu-latest, macOS-latest]
         resolver:
         - nightly-2022-05-05  # ghc-9.2.2
-        - lts-19.6  # ghc-9.0.2
+        - lts-19.6   # ghc-9.0.2
         - lts-18.28  # ghc-8.10.7
         - lts-16.31  # ghc-8.8.4
-    env:
-      RESOLVER: ${{ matrix.resolver }}
 
     steps:
     - uses: actions/checkout@v3
-    - id: haskell-actions-setup
-      uses: haskell/actions/setup@v2
+    - uses: freckle/stack-cache-action@v2
       with:
-        enable-stack: true
-        stack-version: latest
-    - name: Cache
-      uses: actions/cache@v3
+        stack-yaml: stack-${{ matrix.resolver }}.yaml
+    - uses: freckle/stack-action@v3
       with:
-        path: ${{ steps.haskell-actions-setup.outputs.stack-root }}
-        key: ${{ runner.os }}-${{ matrix.resolver }}
-        restore-keys: ${{ runner.os }}-
-    - name: Install GHC
-      run: stack --stack-yaml="stack-${RESOLVER}.yaml" --no-terminal setup
-    - name: Build Dependencies
-      run: stack --stack-yaml="stack-${RESOLVER}.yaml" --no-terminal build --only-dependencies
-    - name: Build
-      run: stack --stack-yaml="stack-${RESOLVER}.yaml" --no-terminal build --pedantic --test --no-run-tests --bench --no-run-benchmarks --haddock --no-haddock-deps
-    - name: Test
-      run: stack --stack-yaml="stack-${RESOLVER}.yaml" --no-terminal build --pedantic --test
+        stack-yaml: stack-${{ matrix.resolver }}.yaml
+        stack-arguments: --bench --no-run-benchmarks --haddock --no-haddock-deps
