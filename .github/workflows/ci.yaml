@@ -19,6 +19,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: freckle/stack-cache-action@v2
       with:
+        prefix: v1/
         stack-yaml: stack-${{ matrix.resolver }}.yaml
     - uses: freckle/stack-action@v3
       with:
