@@ -1,5 +1,9 @@
 # Change log
 
+## 0.2.0.1
+
+* Relax dependency lower bounds to support GHC 8.8 (@pbrisbin)
+
 ## 0.2.0.0
 
 * Deprecate `(.@)` in favor of `(.=)` from `aeson`
