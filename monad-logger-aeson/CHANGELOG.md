@@ -1,5 +1,9 @@
 # Change log
 
+## Unreleased version
+
+* Support `text-2.0`
+
 ## 0.2.0.1
 
 * Relax dependency lower bounds to support GHC 8.8 (@pbrisbin)
