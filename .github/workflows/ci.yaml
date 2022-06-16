@@ -13,10 +13,10 @@ jobs:
       matrix:
         os: [ubuntu-latest, macOS-latest]
         resolver:
-        - nightly-2022-05-05  # ghc-9.2.2
-        - lts-19.6   # ghc-9.0.2
-        - lts-18.28  # ghc-8.10.7
-        - lts-16.31  # ghc-8.8.4
+        - nightly # ghc-9.2.3
+        - lts-19  # ghc-9.0.2
+        - lts-18  # ghc-8.10.7
+        - lts-16  # ghc-8.8.4
 
     steps:
     - uses: actions/checkout@v3
