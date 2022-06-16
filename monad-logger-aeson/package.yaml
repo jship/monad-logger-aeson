@@ -36,7 +36,7 @@ library:
   - exceptions >=0.10.4 && <0.11.0
   - fast-logger >=3.0.2 && <3.2.0
   - monad-logger >=0.3.36 && <0.4.0
-  - text >=1.2.4.0 && <1.3.0.0
+  - text >=1.2.4.0 && <1.3.0.0 || >=2.0 && <2.1
   - time >=1.9.3 && <1.12.0.0
   - unordered-containers >=0.2.10.0 && <0.3.0.0
   source-dirs: library
@@ -67,4 +67,4 @@ executables:
     - base >=4.13.0.0 && <5
     - monad-logger >=0.3.36 && <0.4.0
     - monad-logger-aeson
-    - text >=1.2.4.0 && <1.3.0.0
+    - text >=1.2.4.0 && <1.3.0.0 || >=2.0 && <2.1
