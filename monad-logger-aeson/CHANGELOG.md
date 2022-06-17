@@ -1,5 +1,10 @@
 # Change log
 
+## Unreleased version
+
+* Message metadata is now of type `[SeriesElem]` instead of `[Series]`
+  * _Should_ be backwards-compatible based on library's recommended usage
+
 ## 0.2.0.2
 
 * Support `text-2.0`

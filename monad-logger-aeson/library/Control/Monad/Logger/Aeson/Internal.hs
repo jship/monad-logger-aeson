@@ -1,7 +1,7 @@
 {-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -13,6 +13,7 @@ module Control.Monad.Logger.Aeson.Internal
 
     -- ** @Message@-related
     Message(..)
+  , SeriesElem(..)
   , (.@)
   , LoggedMessage(..)
   , threadContextStore
@@ -100,6 +101,15 @@ keyMapInsert = AesonCompat.insert
 
 keyMapUnion :: KeyMap v -> KeyMap v -> KeyMap v
 keyMapUnion = AesonCompat.union
+
+-- | A single key-value pair, where the value is encoded JSON. This is a more
+-- restricted version of 'Series': a 'SeriesElem' encapsulates exactly one
+-- key-value pair, whereas a 'Series' encapsulates zero or more key-value pairs.
+--
+-- Values of this type are only created via '(.=)' from @aeson@.
+newtype SeriesElem = UnsafeSeriesElem
+  { unSeriesElem :: Series
+  } deriving (KeyValue) via Series
 
 -- | Synonym for '(.=)' from @aeson@.
 --
@@ -239,9 +249,9 @@ instance ToJSON LoggedMessage where
               loggedMessageText :# keyMapToSeriesList loggedMessageMeta
         }
 
-    keyMapToSeriesList :: KeyMap Value -> [Series]
+    keyMapToSeriesList :: KeyMap Value -> [SeriesElem]
     keyMapToSeriesList =
-      fmap (uncurry Aeson.pair . fmap Aeson.toEncoding) . keyMapToList
+      fmap (uncurry (.=)) . keyMapToList
 
     LoggedMessage
       { loggedMessageTimestamp
@@ -254,7 +264,7 @@ instance ToJSON LoggedMessage where
       } = loggedMessage
 
 -- | A 'Message' captures a textual component and a metadata component. The
--- metadata component is a list of 'Series' to support tacking on arbitrary
+-- metadata component is a list of 'SeriesElem' to support tacking on arbitrary
 -- structured data to a log message.
 --
 -- With the @OverloadedStrings@ extension enabled, 'Message' values can be
@@ -279,7 +289,7 @@ instance ToJSON LoggedMessage where
 -- helps!
 --
 -- @since 0.1.0.0
-data Message = Text :# [Series]
+data Message = Text :# [SeriesElem]
 infixr 5 :#
 
 instance IsString Message where
@@ -451,7 +461,7 @@ messageSeries message =
     <> ( if null messageMeta then
            mempty
          else
-           Aeson.pairStr "meta" $ Aeson.pairs $ mconcat messageMeta
+           Aeson.pairStr "meta" $ Aeson.pairs $ foldMap unSeriesElem messageMeta
        )
   where
   messageText :# messageMeta = message
