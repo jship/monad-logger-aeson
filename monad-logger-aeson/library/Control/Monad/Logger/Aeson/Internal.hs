@@ -14,7 +14,6 @@ module Control.Monad.Logger.Aeson.Internal
     -- ** @Message@-related
     Message(..)
   , SeriesElem(..)
-  , (.@)
   , LoggedMessage(..)
   , threadContextStore
   , logCS
@@ -110,16 +109,6 @@ keyMapUnion = AesonCompat.union
 newtype SeriesElem = UnsafeSeriesElem
   { unSeriesElem :: Series
   } deriving (KeyValue) via Series
-
--- | Synonym for '(.=)' from @aeson@.
---
--- This operator is deprecated and will be removed in a future version. Please
--- use '(.=)' instead, which is re-exported from "Data.Aeson".
---
--- @since 0.1.0.0
-(.@) :: (KeyValue kv, ToJSON v) => Key -> v -> kv
-(.@) = (.=)
-{-# DEPRECATED (.@) "This operator will be removed in a future major version." #-}
 
 -- | This type is the Haskell representation of each JSON log message produced
 -- by this library.
