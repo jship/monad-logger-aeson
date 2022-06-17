@@ -9,6 +9,7 @@ module Control.Monad.Logger.Aeson
 
     -- * Types
     Message(..)
+  , SeriesElem
   , (.@)
   , LoggedMessage(..)
 
@@ -91,7 +92,7 @@ import Control.Monad.Logger as Log hiding
 import Control.Monad.Catch (MonadMask, MonadThrow)
 import Control.Monad.IO.Class (MonadIO(liftIO))
 import Control.Monad.Logger.Aeson.Internal
-  ( LoggedMessage(..), Message(..), OutputOptions(..), (.@), KeyMap
+  ( LoggedMessage(..), Message(..), OutputOptions(..), (.@), KeyMap, SeriesElem
   )
 import Data.Aeson (KeyValue((.=)), Value(String))
 import Data.Aeson.Types (Pair)
