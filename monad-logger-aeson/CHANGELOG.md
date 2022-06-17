@@ -1,6 +1,6 @@
 # Change log
 
-## Unreleased version
+## 0.3.0.0
 
 * Remove deprecated `(.@)` operator
 * Message metadata is now of type `[SeriesElem]` instead of `[Series]`
