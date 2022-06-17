@@ -2,6 +2,7 @@
 
 ## Unreleased version
 
+* Remove deprecated `(.@)` operator
 * Message metadata is now of type `[SeriesElem]` instead of `[Series]`
   * _Should_ be backwards-compatible based on library's recommended usage
 
