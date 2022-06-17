@@ -1,6 +1,6 @@
 # Change log
 
-## Unreleased version
+## 0.2.0.2
 
 * Support `text-2.0`
 
