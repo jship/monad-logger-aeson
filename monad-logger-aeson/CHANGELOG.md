@@ -1,5 +1,9 @@
 # Change log
 
+## 0.3.0.1
+
+* Minor Haddock updates
+
 ## 0.3.0.0
 
 * Remove deprecated `(.@)` operator

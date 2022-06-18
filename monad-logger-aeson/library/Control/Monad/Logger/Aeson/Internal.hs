@@ -106,6 +106,8 @@ keyMapUnion = AesonCompat.union
 -- key-value pair, whereas a 'Series' encapsulates zero or more key-value pairs.
 --
 -- Values of this type are only created via '(.=)' from @aeson@.
+--
+-- @since 0.3.0.0
 newtype SeriesElem = UnsafeSeriesElem
   { unSeriesElem :: Series
   } deriving (KeyValue) via Series
