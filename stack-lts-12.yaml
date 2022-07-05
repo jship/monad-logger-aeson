@@ -1,0 +1,38 @@
+resolver: lts-12.26
+packages:
+- ./monad-logger-aeson
+extra-deps:
+- aeson-1.5.2.0
+- hspec-2.7.9
+- hspec-core-2.7.9
+- hspec-discover-2.7.9
+
+# Transitive dependencies of aeson-1.5.2.0
+- primitive-0.7.4.0
+- tagged-0.8.6
+- time-compat-1.9.2.2
+- unordered-containers-0.2.10.0
+
+# https://github.com/jship/context/pull/1
+- github: pbrisbin/context
+  commit: faed2af92cf5aef6b45e42a395245b401eddbff2
+  subdirs:
+    - context
+
+# Avoid aeson -> these -> aeson dependency cyle
+- these-1.1
+
+# Transitive dependency of these-1.1
+- assoc-1
+
+# Transitive dependency of time-compat-1.9.2.2
+- base-orphans-0.8.1
+
+# So that primitive >0.7 as accepted
+- vector-algorithms-0.8.0.1
+
+# Transitive dependencies of hspec
+- QuickCheck-2.13.1
+
+# Transitive dependencies of QuickCheck
+- splitmix-0.0.2
