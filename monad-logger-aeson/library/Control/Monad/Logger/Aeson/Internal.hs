@@ -59,7 +59,6 @@ import Data.Text (Text)
 import Data.Time (UTCTime)
 import GHC.Generics (Generic)
 import GHC.Stack (SrcLoc(..), CallStack, getCallStack)
-import System.Log.FastLogger.Internal (LogStr(..))
 import qualified Context
 import qualified Control.Monad.Logger as Logger
 import qualified Data.Aeson as Aeson
@@ -74,6 +73,12 @@ import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text.Encoding
 import qualified Data.Text.Encoding.Error as Text.Encoding.Error
 import qualified System.IO.Unsafe as IO.Unsafe
+
+#if MIN_VERSION_fast_logger(3,0,1)
+import System.Log.FastLogger.Internal (LogStr(..))
+#else
+import System.Log.FastLogger (LogStr, fromLogStr)
+#endif
 
 #if MIN_VERSION_aeson(2, 0, 0)
 import Data.Aeson.Key (Key)
@@ -390,8 +395,18 @@ defaultLogStrLBS now threadContext loc logSource logLevel logStr =
     Text.Encoding.decodeUtf8With Text.Encoding.Error.lenientDecode
       . LBS.toStrict
 
-  logStrLBS = Builder.toLazyByteString logStrBuilder
-  LogStr _ logStrBuilder = logStr
+  logStrLBS = logStrToLBS logStr
+
+logStrToLBS :: LogStr -> LBS.ByteString
+logStrToLBS =
+#if MIN_VERSION_fast_logger(3,0,1)
+  -- Use (presumably) faster/better conversion if we have new enough fast-logger
+  Builder.toLazyByteString . unLogStr
+   where
+    unLogStr (LogStr _ builder) = builder
+#else
+  LBS.fromStrict . fromLogStr
+#endif
 
 logCS
   :: (MonadLogger m)

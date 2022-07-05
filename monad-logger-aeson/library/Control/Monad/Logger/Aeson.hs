@@ -1,4 +1,5 @@
 {-# LANGUAGE BlockArguments #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
@@ -84,7 +85,9 @@ import Control.Monad.Logger as Log hiding
   , runFileLoggingT
   , runStderrLoggingT
   , runStdoutLoggingT
+#if MIN_VERSION_monad_logger(0,3,36)
   , defaultOutput
+#endif
   , defaultLogStr
   )
 
