@@ -1,7 +1,7 @@
-{-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -115,7 +115,7 @@ keyMapUnion = AesonCompat.union
 -- @since 0.3.0.0
 newtype SeriesElem = UnsafeSeriesElem
   { unSeriesElem :: Series
-  } deriving (KeyValue) via Series
+  } deriving newtype KeyValue
 
 -- | This type is the Haskell representation of each JSON log message produced
 -- by this library.
@@ -136,7 +136,7 @@ data LoggedMessage = LoggedMessage
   } deriving stock (Eq, Generic, Ord, Show)
 
 instance FromJSON LoggedMessage where
-  parseJSON = Aeson.withObject "LoggedMessage" \obj -> do
+  parseJSON = Aeson.withObject "LoggedMessage" $ \obj -> do
     loggedMessageTimestamp <- obj .: "time"
     loggedMessageLevel <- fmap logLevelFromText $ obj .: "level"
     loggedMessageLoc <- parseLoc =<< obj .:? "location"
@@ -163,7 +163,7 @@ instance FromJSON LoggedMessage where
 
     parseLoc :: Maybe Value -> Parser (Maybe Loc)
     parseLoc =
-      traverse $ Aeson.withObject "Loc" \obj ->
+      traverse $ Aeson.withObject "Loc" $ \obj ->
         Loc
           <$> obj .: "file"
           <*> obj .: "package"
@@ -174,11 +174,11 @@ instance FromJSON LoggedMessage where
     parsePairs :: Maybe Value -> Parser (KeyMap Value)
     parsePairs = \case
       Nothing -> pure mempty
-      Just value -> flip (Aeson.withObject "[Pair]") value \obj -> do
+      Just value -> flip (Aeson.withObject "[Pair]") value $ \obj -> do
         pure obj
 
     parseMessage :: Value -> Parser (Text, KeyMap Value)
-    parseMessage = Aeson.withObject "Message" \obj ->
+    parseMessage = Aeson.withObject "Message" $ \obj ->
       (,) <$> obj .: "text" <*> (parsePairs =<< obj .:? "meta")
 
 instance ToJSON LoggedMessage where

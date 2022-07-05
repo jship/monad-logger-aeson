@@ -1,4 +1,3 @@
-{-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TypeApplications #-}
 module TestCase
@@ -63,9 +62,9 @@ withTempLogFile f = do
   Exception.bracket
     (IO.openTempFile "." "monad-logger-aeson")
     (\(filePath, handle) -> IO.hClose handle *> Directory.removeFile filePath)
-    \(filePath, handle) -> do
+    (\(filePath, handle) -> do
       IO.hClose handle
-      f filePath
+      f filePath)
 
 shouldMatchWithPatch :: (HasCallStack) => Value -> (Value, Patch) -> Expectation
 shouldMatchWithPatch actualValue (expectedValue, expectedPatch) = do

@@ -1,4 +1,3 @@
-{-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
@@ -243,7 +242,7 @@ logOtherNS = Internal.logCS callStack
 -- @since 0.1.0.0
 withThreadContext :: (MonadIO m, MonadMask m) => [Pair] -> m a -> m a
 withThreadContext pairs =
-  Context.adjust Internal.threadContextStore \pairsMap ->
+  Context.adjust Internal.threadContextStore $ \pairsMap ->
     Internal.keyMapUnion (Internal.keyMapFromList pairs) pairsMap
 
 -- | This function lets us retrieve the calling thread's thread context. For
@@ -267,7 +266,7 @@ myThreadContext = do
 -- @since 0.1.0.0
 runFileLoggingT :: (MonadIO m, MonadMask m) => FilePath -> LoggingT m a -> m a
 runFileLoggingT filePath action =
-  Catch.bracket (liftIO $ openFile filePath AppendMode) (liftIO . hClose) \h -> do
+  Catch.bracket (liftIO $ openFile filePath AppendMode) (liftIO . hClose) $ \h -> do
     liftIO $ hSetBuffering h LineBuffering
     runLoggingT action $ defaultOutput h
 
@@ -358,7 +357,7 @@ defaultOutputWith
 defaultOutputWith outputOptions location logSource logLevel msg = do
   now <- Time.getCurrentTime
   threadIdText <- fmap (Text.pack . show) Concurrent.myThreadId
-  threadContext <- Context.mines Internal.threadContextStore \hashMap ->
+  threadContext <- Context.mines Internal.threadContextStore $ \hashMap ->
     ( if outputIncludeThreadId then
         Internal.keyMapInsert "tid" $ String threadIdText
       else
@@ -395,7 +394,7 @@ handleOutput
   -> LogStr
   -> IO ()
 handleOutput levelToHandle =
-  defaultOutputWith $ defaultOutputOptions \logLevel bytes -> do
+  defaultOutputWith $ defaultOutputOptions $ \logLevel bytes -> do
     BS8.hPutStrLn (levelToHandle logLevel) bytes
 
 -- | An implementation of the action that backs the 'monadLoggerLog' function,
@@ -419,7 +418,7 @@ fastLoggerOutput
   -> LogStr
   -> IO ()
 fastLoggerOutput loggerSet =
-  defaultOutputWith $ defaultOutputOptions \_logLevel bytes -> do
+  defaultOutputWith $ defaultOutputOptions $ \_logLevel bytes -> do
     FastLogger.pushLogStrLn loggerSet $ toLogStr bytes
 
 -- | @since 0.1.0.0
