@@ -13,9 +13,9 @@ extra-deps:
 - time-compat-1.9.2.2
 - unordered-containers-0.2.10.0
 
-# https://github.com/jship/context/pull/1
-- github: pbrisbin/context
-  commit: faed2af92cf5aef6b45e42a395245b401eddbff2
+# Waiting on Hackage release
+- github: jship/context
+  commit: 05bf7570ad2418fec0688d7ff399b9adf8431911
   subdirs:
     - context
 
