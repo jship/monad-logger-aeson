@@ -1,5 +1,9 @@
 # Change log
 
+## 0.3.0.2
+
+* Backwards compatibility down to GHC 8.4 (@pbrisbin)
+
 ## 0.3.0.1
 
 * Minor Haddock updates
