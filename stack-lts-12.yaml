@@ -3,6 +3,7 @@ packages:
 - ./monad-logger-aeson
 extra-deps:
 - aeson-1.5.2.0
+- context-0.2.0.1
 - hspec-2.7.9
 - hspec-core-2.7.9
 - hspec-discover-2.7.9
@@ -12,12 +13,6 @@ extra-deps:
 - tagged-0.8.6
 - time-compat-1.9.2.2
 - unordered-containers-0.2.10.0
-
-# Waiting on Hackage release
-- github: jship/context
-  commit: 05bf7570ad2418fec0688d7ff399b9adf8431911
-  subdirs:
-    - context
 
 # Avoid aeson -> these -> aeson dependency cyle
 - these-1.1
