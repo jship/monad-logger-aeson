@@ -1,4 +1,3 @@
-{-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Main
   ( main
@@ -12,6 +11,6 @@ doStuff x = do
 
 main :: IO ()
 main = do
-  runStdoutLoggingT do
+  runStdoutLoggingT $ do
     doStuff 42
     logInfo "Done"

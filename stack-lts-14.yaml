@@ -1,0 +1,15 @@
+resolver: lts-14.27
+packages:
+- ./monad-logger-aeson
+extra-deps:
+- aeson-1.5.2.0
+- context-0.2.0.0
+- hspec-2.7.9
+- hspec-core-2.7.9
+- hspec-discover-2.7.9
+
+# Transitive dependency of aeson-1.5.2.0
+- primitive-0.7.4.0
+
+# Avoid aeson -> these -> aeson dependency cyle
+- these-1.1

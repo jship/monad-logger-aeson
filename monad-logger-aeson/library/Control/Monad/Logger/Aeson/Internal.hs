@@ -1,7 +1,7 @@
-{-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -59,7 +59,6 @@ import Data.Text (Text)
 import Data.Time (UTCTime)
 import GHC.Generics (Generic)
 import GHC.Stack (SrcLoc(..), CallStack, getCallStack)
-import System.Log.FastLogger.Internal (LogStr(..))
 import qualified Context
 import qualified Control.Monad.Logger as Logger
 import qualified Data.Aeson as Aeson
@@ -74,6 +73,12 @@ import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text.Encoding
 import qualified Data.Text.Encoding.Error as Text.Encoding.Error
 import qualified System.IO.Unsafe as IO.Unsafe
+
+#if MIN_VERSION_fast_logger(3,0,1)
+import System.Log.FastLogger.Internal (LogStr(..))
+#else
+import System.Log.FastLogger (LogStr, fromLogStr)
+#endif
 
 #if MIN_VERSION_aeson(2, 0, 0)
 import Data.Aeson.Key (Key)
@@ -110,7 +115,7 @@ keyMapUnion = AesonCompat.union
 -- @since 0.3.0.0
 newtype SeriesElem = UnsafeSeriesElem
   { unSeriesElem :: Series
-  } deriving (KeyValue) via Series
+  } deriving newtype KeyValue
 
 -- | This type is the Haskell representation of each JSON log message produced
 -- by this library.
@@ -131,7 +136,7 @@ data LoggedMessage = LoggedMessage
   } deriving stock (Eq, Generic, Ord, Show)
 
 instance FromJSON LoggedMessage where
-  parseJSON = Aeson.withObject "LoggedMessage" \obj -> do
+  parseJSON = Aeson.withObject "LoggedMessage" $ \obj -> do
     loggedMessageTimestamp <- obj .: "time"
     loggedMessageLevel <- fmap logLevelFromText $ obj .: "level"
     loggedMessageLoc <- parseLoc =<< obj .:? "location"
@@ -158,7 +163,7 @@ instance FromJSON LoggedMessage where
 
     parseLoc :: Maybe Value -> Parser (Maybe Loc)
     parseLoc =
-      traverse $ Aeson.withObject "Loc" \obj ->
+      traverse $ Aeson.withObject "Loc" $ \obj ->
         Loc
           <$> obj .: "file"
           <*> obj .: "package"
@@ -169,11 +174,11 @@ instance FromJSON LoggedMessage where
     parsePairs :: Maybe Value -> Parser (KeyMap Value)
     parsePairs = \case
       Nothing -> pure mempty
-      Just value -> flip (Aeson.withObject "[Pair]") value \obj -> do
+      Just value -> flip (Aeson.withObject "[Pair]") value $ \obj -> do
         pure obj
 
     parseMessage :: Value -> Parser (Text, KeyMap Value)
-    parseMessage = Aeson.withObject "Message" \obj ->
+    parseMessage = Aeson.withObject "Message" $ \obj ->
       (,) <$> obj .: "text" <*> (parsePairs =<< obj .:? "meta")
 
 instance ToJSON LoggedMessage where
@@ -390,8 +395,18 @@ defaultLogStrLBS now threadContext loc logSource logLevel logStr =
     Text.Encoding.decodeUtf8With Text.Encoding.Error.lenientDecode
       . LBS.toStrict
 
-  logStrLBS = Builder.toLazyByteString logStrBuilder
-  LogStr _ logStrBuilder = logStr
+  logStrLBS = logStrToLBS logStr
+
+logStrToLBS :: LogStr -> LBS.ByteString
+logStrToLBS =
+#if MIN_VERSION_fast_logger(3,0,1)
+  -- Use (presumably) faster/better conversion if we have new enough fast-logger
+  Builder.toLazyByteString . unLogStr
+   where
+    unLogStr (LogStr _ builder) = builder
+#else
+  LBS.fromStrict . fromLogStr
+#endif
 
 logCS
   :: (MonadLogger m)

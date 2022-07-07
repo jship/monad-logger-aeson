@@ -17,6 +17,8 @@ jobs:
         - lts-19  # ghc-9.0.2
         - lts-18  # ghc-8.10.7
         - lts-16  # ghc-8.8.4
+        - lts-14  # ghc-8.6.5
+        - lts-12  # ghc-8.4.4
 
     steps:
     - uses: actions/checkout@v3

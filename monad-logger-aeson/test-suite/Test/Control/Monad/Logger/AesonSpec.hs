@@ -1,4 +1,3 @@
-{-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
@@ -56,117 +55,117 @@ import qualified TestCase.MonadLogger.LogDebugN.ThreadContextYes
 
 spec :: Spec
 spec = do
-  aroundAll withTempLogFile do
-    describe "Control.Monad.Logger.Aeson" do
-      describe "logDebug" do
-        it "no metadata + no thread context" \logFilePath -> do
+  aroundAll withTempLogFile $ do
+    describe "Control.Monad.Logger.Aeson" $ do
+      describe "logDebug" $ do
+        it "no metadata + no thread context" $ \logFilePath -> do
           runTest $ TestCase.LogDebug.MetadataNoThreadContextNo.testCase logFilePath
-        it "no metadata + thread context" \logFilePath -> do
+        it "no metadata + thread context" $ \logFilePath -> do
           runTest $ TestCase.LogDebug.MetadataNoThreadContextYes.testCase logFilePath
-        it "metadata + no thread context" \logFilePath -> do
+        it "metadata + no thread context" $ \logFilePath -> do
           runTest $ TestCase.LogDebug.MetadataYesThreadContextNo.testCase logFilePath
-        it "metadata + thread context" \logFilePath -> do
+        it "metadata + thread context" $ \logFilePath -> do
           runTest $ TestCase.LogDebug.MetadataYesThreadContextYes.testCase logFilePath
 
-      describe "logInfo" do
-        it "no metadata + no thread context" \logFilePath -> do
+      describe "logInfo" $ do
+        it "no metadata + no thread context" $ \logFilePath -> do
           runTest $ TestCase.LogInfo.MetadataNoThreadContextNo.testCase logFilePath
-        it "no metadata + thread context" \logFilePath -> do
+        it "no metadata + thread context" $ \logFilePath -> do
           runTest $ TestCase.LogInfo.MetadataNoThreadContextYes.testCase logFilePath
-        it "metadata + no thread context" \logFilePath -> do
+        it "metadata + no thread context" $ \logFilePath -> do
           runTest $ TestCase.LogInfo.MetadataYesThreadContextNo.testCase logFilePath
-        it "metadata + thread context" \logFilePath -> do
+        it "metadata + thread context" $ \logFilePath -> do
           runTest $ TestCase.LogInfo.MetadataYesThreadContextYes.testCase logFilePath
 
-      describe "logWarn" do
-        it "no metadata + no thread context" \logFilePath -> do
+      describe "logWarn" $ do
+        it "no metadata + no thread context" $ \logFilePath -> do
           runTest $ TestCase.LogWarn.MetadataNoThreadContextNo.testCase logFilePath
-        it "no metadata + thread context" \logFilePath -> do
+        it "no metadata + thread context" $ \logFilePath -> do
           runTest $ TestCase.LogWarn.MetadataNoThreadContextYes.testCase logFilePath
-        it "metadata + no thread context" \logFilePath -> do
+        it "metadata + no thread context" $ \logFilePath -> do
           runTest $ TestCase.LogWarn.MetadataYesThreadContextNo.testCase logFilePath
-        it "metadata + thread context" \logFilePath -> do
+        it "metadata + thread context" $ \logFilePath -> do
           runTest $ TestCase.LogWarn.MetadataYesThreadContextYes.testCase logFilePath
 
-      describe "logError" do
-        it "no metadata + no thread context" \logFilePath -> do
+      describe "logError" $ do
+        it "no metadata + no thread context" $ \logFilePath -> do
           runTest $ TestCase.LogError.MetadataNoThreadContextNo.testCase logFilePath
-        it "no metadata + thread context" \logFilePath -> do
+        it "no metadata + thread context" $ \logFilePath -> do
           runTest $ TestCase.LogError.MetadataNoThreadContextYes.testCase logFilePath
-        it "metadata + no thread context" \logFilePath -> do
+        it "metadata + no thread context" $ \logFilePath -> do
           runTest $ TestCase.LogError.MetadataYesThreadContextNo.testCase logFilePath
-        it "metadata + thread context" \logFilePath -> do
+        it "metadata + thread context" $ \logFilePath -> do
           runTest $ TestCase.LogError.MetadataYesThreadContextYes.testCase logFilePath
 
-      describe "logOther" do
-        it "no metadata + no thread context" \logFilePath -> do
+      describe "logOther" $ do
+        it "no metadata + no thread context" $ \logFilePath -> do
           runTest $ TestCase.LogOther.MetadataNoThreadContextNo.testCase logFilePath
-        it "no metadata + thread context" \logFilePath -> do
+        it "no metadata + thread context" $ \logFilePath -> do
           runTest $ TestCase.LogOther.MetadataNoThreadContextYes.testCase logFilePath
-        it "metadata + no thread context" \logFilePath -> do
+        it "metadata + no thread context" $ \logFilePath -> do
           runTest $ TestCase.LogOther.MetadataYesThreadContextNo.testCase logFilePath
-        it "metadata + thread context" \logFilePath -> do
+        it "metadata + thread context" $ \logFilePath -> do
           runTest $ TestCase.LogOther.MetadataYesThreadContextYes.testCase logFilePath
 
-      describe "logDebugNS" do
-        it "no metadata + no thread context" \logFilePath -> do
+      describe "logDebugNS" $ do
+        it "no metadata + no thread context" $ \logFilePath -> do
           runTest $ TestCase.LogDebugNS.MetadataNoThreadContextNo.testCase logFilePath
-        it "no metadata + thread context" \logFilePath -> do
+        it "no metadata + thread context" $ \logFilePath -> do
           runTest $ TestCase.LogDebugNS.MetadataNoThreadContextYes.testCase logFilePath
-        it "metadata + no thread context" \logFilePath -> do
+        it "metadata + no thread context" $ \logFilePath -> do
           runTest $ TestCase.LogDebugNS.MetadataYesThreadContextNo.testCase logFilePath
-        it "metadata + thread context" \logFilePath -> do
+        it "metadata + thread context" $ \logFilePath -> do
           runTest $ TestCase.LogDebugNS.MetadataYesThreadContextYes.testCase logFilePath
 
-      describe "logInfoNS" do
-        it "no metadata + no thread context" \logFilePath -> do
+      describe "logInfoNS" $ do
+        it "no metadata + no thread context" $ \logFilePath -> do
           runTest $ TestCase.LogInfoNS.MetadataNoThreadContextNo.testCase logFilePath
-        it "no metadata + thread context" \logFilePath -> do
+        it "no metadata + thread context" $ \logFilePath -> do
           runTest $ TestCase.LogInfoNS.MetadataNoThreadContextYes.testCase logFilePath
-        it "metadata + no thread context" \logFilePath -> do
+        it "metadata + no thread context" $ \logFilePath -> do
           runTest $ TestCase.LogInfoNS.MetadataYesThreadContextNo.testCase logFilePath
-        it "metadata + thread context" \logFilePath -> do
+        it "metadata + thread context" $ \logFilePath -> do
           runTest $ TestCase.LogInfoNS.MetadataYesThreadContextYes.testCase logFilePath
 
-      describe "logWarnNS" do
-        it "no metadata + no thread context" \logFilePath -> do
+      describe "logWarnNS" $ do
+        it "no metadata + no thread context" $ \logFilePath -> do
           runTest $ TestCase.LogWarnNS.MetadataNoThreadContextNo.testCase logFilePath
-        it "no metadata + thread context" \logFilePath -> do
+        it "no metadata + thread context" $ \logFilePath -> do
           runTest $ TestCase.LogWarnNS.MetadataNoThreadContextYes.testCase logFilePath
-        it "metadata + no thread context" \logFilePath -> do
+        it "metadata + no thread context" $ \logFilePath -> do
           runTest $ TestCase.LogWarnNS.MetadataYesThreadContextNo.testCase logFilePath
-        it "metadata + thread context" \logFilePath -> do
+        it "metadata + thread context" $ \logFilePath -> do
           runTest $ TestCase.LogWarnNS.MetadataYesThreadContextYes.testCase logFilePath
 
-      describe "logErrorNS" do
-        it "no metadata + no thread context" \logFilePath -> do
+      describe "logErrorNS" $ do
+        it "no metadata + no thread context" $ \logFilePath -> do
           runTest $ TestCase.LogErrorNS.MetadataNoThreadContextNo.testCase logFilePath
-        it "no metadata + thread context" \logFilePath -> do
+        it "no metadata + thread context" $ \logFilePath -> do
           runTest $ TestCase.LogErrorNS.MetadataNoThreadContextYes.testCase logFilePath
-        it "metadata + no thread context" \logFilePath -> do
+        it "metadata + no thread context" $ \logFilePath -> do
           runTest $ TestCase.LogErrorNS.MetadataYesThreadContextNo.testCase logFilePath
-        it "metadata + thread context" \logFilePath -> do
+        it "metadata + thread context" $ \logFilePath -> do
           runTest $ TestCase.LogErrorNS.MetadataYesThreadContextYes.testCase logFilePath
 
-      describe "logOtherNS" do
-        it "no metadata + no thread context" \logFilePath -> do
+      describe "logOtherNS" $ do
+        it "no metadata + no thread context" $ \logFilePath -> do
           runTest $ TestCase.LogOtherNS.MetadataNoThreadContextNo.testCase logFilePath
-        it "no metadata + thread context" \logFilePath -> do
+        it "no metadata + thread context" $ \logFilePath -> do
           runTest $ TestCase.LogOtherNS.MetadataNoThreadContextYes.testCase logFilePath
-        it "metadata + no thread context" \logFilePath -> do
+        it "metadata + no thread context" $ \logFilePath -> do
           runTest $ TestCase.LogOtherNS.MetadataYesThreadContextNo.testCase logFilePath
-        it "metadata + thread context" \logFilePath -> do
+        it "metadata + thread context" $ \logFilePath -> do
           runTest $ TestCase.LogOtherNS.MetadataYesThreadContextYes.testCase logFilePath
 
-    describe "Control.Monad.Logger.CallStack ('log*' from 'monad-logger')" do
-      describe "logDebug" do
-        it "no metadata + no thread context" \logFilePath -> do
+    describe "Control.Monad.Logger.CallStack ('log*' from 'monad-logger')" $ do
+      describe "logDebug" $ do
+        it "no metadata + no thread context" $ \logFilePath -> do
           runTest $ TestCase.MonadLogger.LogDebug.ThreadContextNo.testCase logFilePath
-        it "no metadata + thread context" \logFilePath -> do
+        it "no metadata + thread context" $ \logFilePath -> do
           runTest $ TestCase.MonadLogger.LogDebug.ThreadContextYes.testCase logFilePath
 
-      describe "logDebugN" do
-        it "no metadata + no thread context" \logFilePath -> do
+      describe "logDebugN" $ do
+        it "no metadata + no thread context" $ \logFilePath -> do
           runTest $ TestCase.MonadLogger.LogDebugN.ThreadContextNo.testCase logFilePath
-        it "no metadata + thread context" \logFilePath -> do
+        it "no metadata + thread context" $ \logFilePath -> do
           runTest $ TestCase.MonadLogger.LogDebugN.ThreadContextYes.testCase logFilePath

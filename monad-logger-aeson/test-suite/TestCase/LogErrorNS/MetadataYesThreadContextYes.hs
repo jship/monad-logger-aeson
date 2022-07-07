@@ -1,4 +1,3 @@
-{-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
@@ -19,7 +18,7 @@ testCase :: FilePath -> TestCase
 testCase logFilePath =
   TestCase
     { actionUnderTest = do
-        withThreadContext ["reqId" .= ("74ec1d0b" :: String)] do
+        withThreadContext ["reqId" .= ("74ec1d0b" :: String)] $ do
           logErrorNS "tests" $ "With metadata" :#
             [ "a" .= (42 :: Int)
             , "b" .= ("x" :: String)
@@ -34,7 +33,7 @@ testCase logFilePath =
               "package": "main",
               "module": "TestCase.LogErrorNS.MetadataYesThreadContextYes",
               "file": "test-suite/TestCase/LogErrorNS/MetadataYesThreadContextYes.hs",
-              "line": 23,
+              "line": 22,
               "char": 11
             },
             "source": "tests",
@@ -69,7 +68,7 @@ testCase logFilePath =
                 { loc_package = "main"
                 , loc_module = "TestCase.LogErrorNS.MetadataYesThreadContextYes"
                 , loc_filename = "test-suite/TestCase/LogErrorNS/MetadataYesThreadContextYes.hs"
-                , loc_start = (23, 11)
+                , loc_start = (22, 11)
                 , loc_end = (0, 0)
                 }
           , loggedMessageLogSource = Just "tests"

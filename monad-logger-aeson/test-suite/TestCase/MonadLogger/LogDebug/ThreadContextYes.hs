@@ -1,4 +1,3 @@
-{-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
@@ -18,7 +17,7 @@ testCase :: FilePath -> TestCase
 testCase logFilePath =
   TestCase
     { actionUnderTest = do
-        withThreadContext ["reqId" .= ("74ec1d0b" :: String)] do
+        withThreadContext ["reqId" .= ("74ec1d0b" :: String)] $ do
           ML.logDebug "Logged from 'monad-logger'"
     , logFilePath
     , expectedValue =
@@ -30,7 +29,7 @@ testCase logFilePath =
               "package": "main",
               "module": "TestCase.MonadLogger.LogDebug.ThreadContextYes",
               "file": "test-suite/TestCase/MonadLogger/LogDebug/ThreadContextYes.hs",
-              "line": 22,
+              "line": 21,
               "char": 11
             },
             "context": {
@@ -60,7 +59,7 @@ testCase logFilePath =
                 { loc_package = "main"
                 , loc_module = "TestCase.MonadLogger.LogDebug.ThreadContextYes"
                 , loc_filename = "test-suite/TestCase/MonadLogger/LogDebug/ThreadContextYes.hs"
-                , loc_start = (22, 11)
+                , loc_start = (21, 11)
                 , loc_end = (0, 0)
                 }
           , loggedMessageLogSource = Nothing
