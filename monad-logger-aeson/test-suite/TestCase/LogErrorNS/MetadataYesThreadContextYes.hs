@@ -33,7 +33,7 @@ testCase logFilePath =
               "package": "main",
               "module": "TestCase.LogErrorNS.MetadataYesThreadContextYes",
               "file": "test-suite/TestCase/LogErrorNS/MetadataYesThreadContextYes.hs",
-              "line": 23,
+              "line": 22,
               "char": 11
             },
             "source": "tests",
@@ -68,7 +68,7 @@ testCase logFilePath =
                 { loc_package = "main"
                 , loc_module = "TestCase.LogErrorNS.MetadataYesThreadContextYes"
                 , loc_filename = "test-suite/TestCase/LogErrorNS/MetadataYesThreadContextYes.hs"
-                , loc_start = (23, 11)
+                , loc_start = (22, 11)
                 , loc_end = (0, 0)
                 }
           , loggedMessageLogSource = Just "tests"
