@@ -1,5 +1,5 @@
 name: monad-logger-aeson
-version: '0.3.0.2'
+version: '0.3.1.0'
 github: "jship/monad-logger-aeson"
 license: MIT
 license-file: LICENSE.md

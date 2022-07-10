@@ -1,6 +1,6 @@
 # Change log
 
-## Unreleased version
+## 0.3.1.0
 
 * Add `Semigroup` instance for `SeriesElem`
 
