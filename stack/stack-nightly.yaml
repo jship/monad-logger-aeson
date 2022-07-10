@@ -1,3 +1,3 @@
 resolver: nightly-2022-07-10
 packages:
-- ./monad-logger-aeson
+- ../monad-logger-aeson

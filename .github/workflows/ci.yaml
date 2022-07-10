@@ -25,8 +25,8 @@ jobs:
     - uses: freckle/stack-cache-action@v2
       with:
         prefix: v1/
-        stack-yaml: stack-${{ matrix.resolver }}.yaml
+        stack-yaml: stack/stack-${{ matrix.resolver }}.yaml
     - uses: freckle/stack-action@v3
       with:
-        stack-yaml: stack-${{ matrix.resolver }}.yaml
+        stack-yaml: stack/stack-${{ matrix.resolver }}.yaml
         stack-arguments: --bench --no-run-benchmarks --haddock --no-haddock-deps

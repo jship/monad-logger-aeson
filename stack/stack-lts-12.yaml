@@ -1,6 +1,6 @@
 resolver: lts-12.26
 packages:
-- ./monad-logger-aeson
+  - ../monad-logger-aeson
 extra-deps:
 - aeson-1.5.2.0
 - context-0.2.0.1
