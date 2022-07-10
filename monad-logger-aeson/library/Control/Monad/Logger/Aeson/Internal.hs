@@ -6,6 +6,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE StrictData #-}
 module Control.Monad.Logger.Aeson.Internal
   ( -- * Disclaimer
@@ -107,15 +108,25 @@ keyMapUnion :: KeyMap v -> KeyMap v -> KeyMap v
 keyMapUnion = AesonCompat.union
 
 -- | A single key-value pair, where the value is encoded JSON. This is a more
--- restricted version of 'Series': a 'SeriesElem' encapsulates exactly one
--- key-value pair, whereas a 'Series' encapsulates zero or more key-value pairs.
+-- restricted version of 'Series': a 'SeriesElem' is intended to encapsulate
+-- exactly one key-value pair, whereas a 'Series' encapsulates zero or more
+-- key-value pairs. 'SeriesElem' values can be created via '(.=)' from @aeson@.
 --
--- Values of this type are only created via '(.=)' from @aeson@.
+-- While a 'SeriesElem' most often will map to a single pair, note that a
+-- 'Semigroup' instance is available for performance's sake. The 'Semigroup'
+-- instance is useful when multiple pairs are grouped together and then shared
+-- across multiple logging calls. In that case, the cost of combining the pairs
+-- in the group must only be paid once.
 --
 -- @since 0.3.0.0
 newtype SeriesElem = UnsafeSeriesElem
   { unSeriesElem :: Series
-  } deriving newtype KeyValue
+  }
+
+-- | @since 0.3.0.0
+deriving newtype instance KeyValue SeriesElem
+-- | @since 0.3.1.0
+deriving newtype instance Semigroup SeriesElem
 
 -- | This type is the Haskell representation of each JSON log message produced
 -- by this library.

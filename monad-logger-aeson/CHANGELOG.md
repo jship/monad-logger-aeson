@@ -1,5 +1,9 @@
 # Change log
 
+## Unreleased version
+
+* Add `Semigroup` instance for `SeriesElem`
+
 ## 0.3.0.2
 
 * Backwards compatibility down to GHC 8.4 (@pbrisbin)
