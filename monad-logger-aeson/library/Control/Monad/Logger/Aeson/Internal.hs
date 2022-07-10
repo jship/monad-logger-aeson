@@ -6,6 +6,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE StrictData #-}
 module Control.Monad.Logger.Aeson.Internal
   ( -- * Disclaimer
@@ -120,8 +121,12 @@ keyMapUnion = AesonCompat.union
 -- @since 0.3.0.0
 newtype SeriesElem = UnsafeSeriesElem
   { unSeriesElem :: Series
-  } deriving newtype (KeyValue) -- ^ @since 0.3.0.0
-    deriving newtype (Semigroup) -- ^ @since 0.3.1.0
+  }
+
+-- | @since 0.3.0.0
+deriving newtype instance KeyValue SeriesElem
+-- | @since 0.3.1.0
+deriving newtype instance Semigroup SeriesElem
 
 -- | This type is the Haskell representation of each JSON log message produced
 -- by this library.
