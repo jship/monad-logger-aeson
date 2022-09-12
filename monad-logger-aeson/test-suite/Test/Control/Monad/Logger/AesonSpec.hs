@@ -12,6 +12,10 @@ import qualified TestCase.LogDebug.MetadataNoThreadContextNo
 import qualified TestCase.LogDebug.MetadataNoThreadContextYes
 import qualified TestCase.LogDebug.MetadataYesThreadContextNo
 import qualified TestCase.LogDebug.MetadataYesThreadContextYes
+import qualified TestCase.LogDebugN.MetadataNoThreadContextNo
+import qualified TestCase.LogDebugN.MetadataNoThreadContextYes
+import qualified TestCase.LogDebugN.MetadataYesThreadContextNo
+import qualified TestCase.LogDebugN.MetadataYesThreadContextYes
 import qualified TestCase.LogDebugNS.MetadataNoThreadContextNo
 import qualified TestCase.LogDebugNS.MetadataNoThreadContextYes
 import qualified TestCase.LogDebugNS.MetadataYesThreadContextNo
@@ -20,6 +24,10 @@ import qualified TestCase.LogError.MetadataNoThreadContextNo
 import qualified TestCase.LogError.MetadataNoThreadContextYes
 import qualified TestCase.LogError.MetadataYesThreadContextNo
 import qualified TestCase.LogError.MetadataYesThreadContextYes
+import qualified TestCase.LogErrorN.MetadataNoThreadContextNo
+import qualified TestCase.LogErrorN.MetadataNoThreadContextYes
+import qualified TestCase.LogErrorN.MetadataYesThreadContextNo
+import qualified TestCase.LogErrorN.MetadataYesThreadContextYes
 import qualified TestCase.LogErrorNS.MetadataNoThreadContextNo
 import qualified TestCase.LogErrorNS.MetadataNoThreadContextYes
 import qualified TestCase.LogErrorNS.MetadataYesThreadContextNo
@@ -28,6 +36,10 @@ import qualified TestCase.LogInfo.MetadataNoThreadContextNo
 import qualified TestCase.LogInfo.MetadataNoThreadContextYes
 import qualified TestCase.LogInfo.MetadataYesThreadContextNo
 import qualified TestCase.LogInfo.MetadataYesThreadContextYes
+import qualified TestCase.LogInfoN.MetadataNoThreadContextNo
+import qualified TestCase.LogInfoN.MetadataNoThreadContextYes
+import qualified TestCase.LogInfoN.MetadataYesThreadContextNo
+import qualified TestCase.LogInfoN.MetadataYesThreadContextYes
 import qualified TestCase.LogInfoNS.MetadataNoThreadContextNo
 import qualified TestCase.LogInfoNS.MetadataNoThreadContextYes
 import qualified TestCase.LogInfoNS.MetadataYesThreadContextNo
@@ -36,6 +48,10 @@ import qualified TestCase.LogOther.MetadataNoThreadContextNo
 import qualified TestCase.LogOther.MetadataNoThreadContextYes
 import qualified TestCase.LogOther.MetadataYesThreadContextNo
 import qualified TestCase.LogOther.MetadataYesThreadContextYes
+import qualified TestCase.LogOtherN.MetadataNoThreadContextNo
+import qualified TestCase.LogOtherN.MetadataNoThreadContextYes
+import qualified TestCase.LogOtherN.MetadataYesThreadContextNo
+import qualified TestCase.LogOtherN.MetadataYesThreadContextYes
 import qualified TestCase.LogOtherNS.MetadataNoThreadContextNo
 import qualified TestCase.LogOtherNS.MetadataNoThreadContextYes
 import qualified TestCase.LogOtherNS.MetadataYesThreadContextNo
@@ -44,6 +60,10 @@ import qualified TestCase.LogWarn.MetadataNoThreadContextNo
 import qualified TestCase.LogWarn.MetadataNoThreadContextYes
 import qualified TestCase.LogWarn.MetadataYesThreadContextNo
 import qualified TestCase.LogWarn.MetadataYesThreadContextYes
+import qualified TestCase.LogWarnN.MetadataNoThreadContextNo
+import qualified TestCase.LogWarnN.MetadataNoThreadContextYes
+import qualified TestCase.LogWarnN.MetadataYesThreadContextNo
+import qualified TestCase.LogWarnN.MetadataYesThreadContextYes
 import qualified TestCase.LogWarnNS.MetadataNoThreadContextNo
 import qualified TestCase.LogWarnNS.MetadataNoThreadContextYes
 import qualified TestCase.LogWarnNS.MetadataYesThreadContextNo
@@ -106,6 +126,56 @@ spec = do
           runTest $ TestCase.LogOther.MetadataYesThreadContextNo.testCase logFilePath
         it "metadata + thread context" $ \logFilePath -> do
           runTest $ TestCase.LogOther.MetadataYesThreadContextYes.testCase logFilePath
+
+      describe "logDebugN" $ do
+        it "no metadata + no thread context" $ \logFilePath -> do
+          runTest $ TestCase.LogDebugN.MetadataNoThreadContextNo.testCase logFilePath
+        it "no metadata + thread context" $ \logFilePath -> do
+          runTest $ TestCase.LogDebugN.MetadataNoThreadContextYes.testCase logFilePath
+        it "metadata + no thread context" $ \logFilePath -> do
+          runTest $ TestCase.LogDebugN.MetadataYesThreadContextNo.testCase logFilePath
+        it "metadata + thread context" $ \logFilePath -> do
+          runTest $ TestCase.LogDebugN.MetadataYesThreadContextYes.testCase logFilePath
+
+      describe "logInfoN" $ do
+        it "no metadata + no thread context" $ \logFilePath -> do
+          runTest $ TestCase.LogInfoN.MetadataNoThreadContextNo.testCase logFilePath
+        it "no metadata + thread context" $ \logFilePath -> do
+          runTest $ TestCase.LogInfoN.MetadataNoThreadContextYes.testCase logFilePath
+        it "metadata + no thread context" $ \logFilePath -> do
+          runTest $ TestCase.LogInfoN.MetadataYesThreadContextNo.testCase logFilePath
+        it "metadata + thread context" $ \logFilePath -> do
+          runTest $ TestCase.LogInfoN.MetadataYesThreadContextYes.testCase logFilePath
+
+      describe "logWarnN" $ do
+        it "no metadata + no thread context" $ \logFilePath -> do
+          runTest $ TestCase.LogWarnN.MetadataNoThreadContextNo.testCase logFilePath
+        it "no metadata + thread context" $ \logFilePath -> do
+          runTest $ TestCase.LogWarnN.MetadataNoThreadContextYes.testCase logFilePath
+        it "metadata + no thread context" $ \logFilePath -> do
+          runTest $ TestCase.LogWarnN.MetadataYesThreadContextNo.testCase logFilePath
+        it "metadata + thread context" $ \logFilePath -> do
+          runTest $ TestCase.LogWarnN.MetadataYesThreadContextYes.testCase logFilePath
+
+      describe "logErrorN" $ do
+        it "no metadata + no thread context" $ \logFilePath -> do
+          runTest $ TestCase.LogErrorN.MetadataNoThreadContextNo.testCase logFilePath
+        it "no metadata + thread context" $ \logFilePath -> do
+          runTest $ TestCase.LogErrorN.MetadataNoThreadContextYes.testCase logFilePath
+        it "metadata + no thread context" $ \logFilePath -> do
+          runTest $ TestCase.LogErrorN.MetadataYesThreadContextNo.testCase logFilePath
+        it "metadata + thread context" $ \logFilePath -> do
+          runTest $ TestCase.LogErrorN.MetadataYesThreadContextYes.testCase logFilePath
+
+      describe "logOtherN" $ do
+        it "no metadata + no thread context" $ \logFilePath -> do
+          runTest $ TestCase.LogOtherN.MetadataNoThreadContextNo.testCase logFilePath
+        it "no metadata + thread context" $ \logFilePath -> do
+          runTest $ TestCase.LogOtherN.MetadataNoThreadContextYes.testCase logFilePath
+        it "metadata + no thread context" $ \logFilePath -> do
+          runTest $ TestCase.LogOtherN.MetadataYesThreadContextNo.testCase logFilePath
+        it "metadata + thread context" $ \logFilePath -> do
+          runTest $ TestCase.LogOtherN.MetadataYesThreadContextYes.testCase logFilePath
 
       describe "logDebugNS" $ do
         it "no metadata + no thread context" $ \logFilePath -> do

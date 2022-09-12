@@ -1,5 +1,10 @@
 # Change log
 
+## Unreleased changes
+
+* Replace `log*N` variants reexported from `monad-logger` with custom variants
+  that accept `Message` instead of `Text`
+
 ## 0.3.1.0
 
 * Add `Semigroup` instance for `SeriesElem`
