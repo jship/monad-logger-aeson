@@ -1,6 +1,6 @@
 # Change log
 
-## Unreleased changes
+## 0.4.0.0
 
 * Replace `log*N` variants reexported from `monad-logger` with custom variants
   that accept `Message` instead of `Text`
