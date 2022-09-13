@@ -31,6 +31,12 @@ module Control.Monad.Logger.Aeson
   , logWarnNS
   , logErrorNS
   , logOtherNS
+    -- ** Convenience aliases
+  , logDebugN
+  , logInfoN
+  , logWarnN
+  , logErrorN
+  , logOtherN
 
     -- ** Thread context
   , withThreadContext
@@ -76,6 +82,11 @@ import Control.Monad.Logger as Log hiding
   , logErrorCS
   , logOtherCS
   , logWithoutLoc -- No re-export, as the 'log*NS' here use call stack for loc
+  , logDebugN
+  , logInfoN
+  , logWarnN
+  , logErrorN
+  , logOtherN
   , logDebugNS
   , logInfoNS
   , logWarnNS
@@ -173,6 +184,39 @@ logOtherCS cs lvl msg = Internal.logCS cs "" lvl msg
 -- @since 0.1.0.0
 logErrorCS :: (MonadLogger m) => CallStack -> Message -> m ()
 logErrorCS cs msg = Internal.logCS cs "" LevelError msg
+
+-- | See 'logDebug'.
+--
+-- This is an alias for 'logDebug' and is provided mainly for symmetry with
+-- @monad-logger@.
+--
+-- @since 0.4.0.0
+logDebugN :: (HasCallStack, MonadLogger m) => Message -> m ()
+logDebugN = logDebugCS callStack
+
+-- | See 'logDebugN'
+--
+-- @since 0.4.0.0
+logInfoN :: (HasCallStack, MonadLogger m) => Message -> m ()
+logInfoN = logInfoCS callStack
+
+-- | See 'logDebugN'
+--
+-- @since 0.4.0.0
+logWarnN :: (HasCallStack, MonadLogger m) => Message -> m ()
+logWarnN = logWarnCS callStack
+
+-- | See 'logDebugN'
+--
+-- @since 0.4.0.0
+logErrorN :: (HasCallStack, MonadLogger m) => Message -> m ()
+logErrorN = logErrorCS callStack
+
+-- | See 'logDebugN'
+--
+-- @since 0.4.0.0
+logOtherN :: (HasCallStack, MonadLogger m) => LogLevel -> Message -> m ()
+logOtherN = logOtherCS callStack
 
 -- | See 'logDebugCS'
 --

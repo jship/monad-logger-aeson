@@ -78,6 +78,10 @@ test-suite monad-logger-aeson-test-suite
       TestCase.LogDebug.MetadataNoThreadContextYes
       TestCase.LogDebug.MetadataYesThreadContextNo
       TestCase.LogDebug.MetadataYesThreadContextYes
+      TestCase.LogDebugN.MetadataNoThreadContextNo
+      TestCase.LogDebugN.MetadataNoThreadContextYes
+      TestCase.LogDebugN.MetadataYesThreadContextNo
+      TestCase.LogDebugN.MetadataYesThreadContextYes
       TestCase.LogDebugNS.MetadataNoThreadContextNo
       TestCase.LogDebugNS.MetadataNoThreadContextYes
       TestCase.LogDebugNS.MetadataYesThreadContextNo
@@ -86,6 +90,10 @@ test-suite monad-logger-aeson-test-suite
       TestCase.LogError.MetadataNoThreadContextYes
       TestCase.LogError.MetadataYesThreadContextNo
       TestCase.LogError.MetadataYesThreadContextYes
+      TestCase.LogErrorN.MetadataNoThreadContextNo
+      TestCase.LogErrorN.MetadataNoThreadContextYes
+      TestCase.LogErrorN.MetadataYesThreadContextNo
+      TestCase.LogErrorN.MetadataYesThreadContextYes
       TestCase.LogErrorNS.MetadataNoThreadContextNo
       TestCase.LogErrorNS.MetadataNoThreadContextYes
       TestCase.LogErrorNS.MetadataYesThreadContextNo
@@ -94,6 +102,10 @@ test-suite monad-logger-aeson-test-suite
       TestCase.LogInfo.MetadataNoThreadContextYes
       TestCase.LogInfo.MetadataYesThreadContextNo
       TestCase.LogInfo.MetadataYesThreadContextYes
+      TestCase.LogInfoN.MetadataNoThreadContextNo
+      TestCase.LogInfoN.MetadataNoThreadContextYes
+      TestCase.LogInfoN.MetadataYesThreadContextNo
+      TestCase.LogInfoN.MetadataYesThreadContextYes
       TestCase.LogInfoNS.MetadataNoThreadContextNo
       TestCase.LogInfoNS.MetadataNoThreadContextYes
       TestCase.LogInfoNS.MetadataYesThreadContextNo
@@ -102,6 +114,10 @@ test-suite monad-logger-aeson-test-suite
       TestCase.LogOther.MetadataNoThreadContextYes
       TestCase.LogOther.MetadataYesThreadContextNo
       TestCase.LogOther.MetadataYesThreadContextYes
+      TestCase.LogOtherN.MetadataNoThreadContextNo
+      TestCase.LogOtherN.MetadataNoThreadContextYes
+      TestCase.LogOtherN.MetadataYesThreadContextNo
+      TestCase.LogOtherN.MetadataYesThreadContextYes
       TestCase.LogOtherNS.MetadataNoThreadContextNo
       TestCase.LogOtherNS.MetadataNoThreadContextYes
       TestCase.LogOtherNS.MetadataYesThreadContextNo
@@ -110,6 +126,10 @@ test-suite monad-logger-aeson-test-suite
       TestCase.LogWarn.MetadataNoThreadContextYes
       TestCase.LogWarn.MetadataYesThreadContextNo
       TestCase.LogWarn.MetadataYesThreadContextYes
+      TestCase.LogWarnN.MetadataNoThreadContextNo
+      TestCase.LogWarnN.MetadataNoThreadContextYes
+      TestCase.LogWarnN.MetadataYesThreadContextNo
+      TestCase.LogWarnN.MetadataYesThreadContextYes
       TestCase.LogWarnNS.MetadataNoThreadContextNo
       TestCase.LogWarnNS.MetadataNoThreadContextYes
       TestCase.LogWarnNS.MetadataYesThreadContextNo
