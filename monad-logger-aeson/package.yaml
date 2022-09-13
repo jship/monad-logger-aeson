@@ -1,5 +1,5 @@
 name: monad-logger-aeson
-version: '0.4.0.0'
+version: '0.4.0.1'
 github: "jship/monad-logger-aeson"
 license: MIT
 license-file: LICENSE.md
@@ -37,7 +37,7 @@ library:
   - fast-logger >=2.4.11 && <3.2.0
   - monad-logger >=0.3.30 && <0.4.0
   - text >=1.2.3.1 && <1.3.0.0 || >=2.0 && <2.1
-  - time >=1.8.0.2 && <1.12.0.0
+  - time >=1.8.0.2 && <1.13
   - unordered-containers >=0.2.10.0 && <0.3.0.0
   source-dirs: library
 
@@ -53,10 +53,10 @@ tests:
     - base >=4.11.1.0 && <5
     - bytestring >=0.10.8.2 && <0.12.0.0
     - directory >=1.3.1.5 && <1.4.0.0
-    - hspec >=2.7.9 && <2.10.0
+    - hspec >=2.7.9 && <2.11
     - monad-logger >=0.3.30 && <0.4.0
     - monad-logger-aeson
-    - time >=1.8.0.2 && <1.12.0.0
+    - time >=1.8.0.2 && <1.13
 
 executables:
   readme-example:

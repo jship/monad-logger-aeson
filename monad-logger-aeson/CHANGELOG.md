@@ -1,5 +1,10 @@
 # Change log
 
+## 0.4.0.1
+
+* Relax upper bound on `hspec`: 2.10 -> 2.11
+* Relax upper bound on `time`: 1.12 -> 1.13
+
 ## 0.4.0.0
 
 * Replace `log*N` variants reexported from `monad-logger` with custom variants
