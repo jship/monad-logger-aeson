@@ -1,5 +1,9 @@
 # Change log
 
+## 0.4.0.2
+
+* Relax upper bound on `time`: 1.13 -> 1.14
+
 ## 0.4.0.1
 
 * Relax upper bound on `hspec`: 2.10 -> 2.11
