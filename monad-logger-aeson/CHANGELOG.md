@@ -1,5 +1,9 @@
 # Change log
 
+## 0.4.0.3
+
+* Relax upper bound on `fast-logger`: 3.2.0 -> 3.3.0
+
 ## 0.4.0.2
 
 * Relax upper bound on `time`: 1.13 -> 1.14
