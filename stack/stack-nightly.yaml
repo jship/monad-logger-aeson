@@ -1,3 +1,14 @@
-resolver: nightly-2023-04-25
+resolver: nightly-2023-06-30
 packages:
 - ../monad-logger-aeson
+extra-deps:
+# These are temporary to ensure we can build against aeson-2.2.
+- aeson-2.2.0.0@sha256:deeab33f7f2a235c9e9ea76168f27a3669ad51bbdb363e830015352a3b2874ec,6217
+- integer-conversion-0.1
+- text-iso8601-0.1
+# Remove after https://github.com/snoyberg/yaml/pull/220 is released.
+- github: jgm/yaml
+  commit: c41822ba7ccc2afd619a664b5026349b416bd2eb
+  subdirs:
+  - libyaml
+  - yaml
