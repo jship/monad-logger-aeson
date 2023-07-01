@@ -1,8 +1,10 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
@@ -50,9 +52,8 @@ module Control.Monad.Logger.Aeson.Internal
   ) where
 
 import Context (Store)
-import Control.Applicative (Applicative(liftA2))
 import Control.Monad.Logger (Loc(..), LogLevel(..), MonadLogger(..), ToLogStr(..), LogSource)
-import Data.Aeson (KeyValue((.=)), Value(Object), (.:), (.:?), Encoding, FromJSON, ToJSON)
+import Data.Aeson (KeyValue(..), Value(Object), (.:), (.:?), Encoding, FromJSON, ToJSON)
 import Data.Aeson.Encoding.Internal (Series(..))
 import Data.Aeson.Types (Pair, Parser)
 import Data.String (IsString)
@@ -124,7 +125,17 @@ newtype SeriesElem = UnsafeSeriesElem
   }
 
 -- | @since 0.3.0.0
+#if MIN_VERSION_aeson(2, 2, 0)
+instance KeyValue Encoding SeriesElem where
+  (.=) = explicitToField Aeson.toEncoding
+  {-# INLINE (.=) #-}
+
+  explicitToField f name value =
+    UnsafeSeriesElem $ Aeson.pair name $ f value
+  {-# INLINE explicitToField #-}
+#else
 deriving newtype instance KeyValue SeriesElem
+#endif
 -- | @since 0.3.1.0
 deriving newtype instance Semigroup SeriesElem
 
@@ -179,7 +190,7 @@ instance FromJSON LoggedMessage where
           <$> obj .: "file"
           <*> obj .: "package"
           <*> obj .: "module"
-          <*> (liftA2 (,) (obj .: "line") (obj .: "char"))
+          <*> (pure (,) <*> (obj .: "line") <*> (obj .: "char"))
           <*> pure (0, 0)
 
     parsePairs :: Maybe Value -> Parser (KeyMap Value)

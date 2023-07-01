@@ -3,10 +3,57 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-packages: []
+packages:
+- completed:
+    hackage: aeson-2.2.0.0@sha256:deeab33f7f2a235c9e9ea76168f27a3669ad51bbdb363e830015352a3b2874ec,6217
+    pantry-tree:
+      sha256: 2c65659ff9ab19047728c8cc2f20869ba7ca78a09fe03cecf826f5857f3d4c95
+      size: 83036
+  original:
+    hackage: aeson-2.2.0.0@sha256:deeab33f7f2a235c9e9ea76168f27a3669ad51bbdb363e830015352a3b2874ec,6217
+- completed:
+    hackage: integer-conversion-0.1@sha256:9f77cc7711d3100a4483f2dd1a22f4be5b59d235a556d910d0e6c5e90a967551,2208
+    pantry-tree:
+      sha256: 17063e15091711b54f9a4a9ccb032f3c2ed68bb4ba097243333469ad8462b748
+      size: 509
+  original:
+    hackage: integer-conversion-0.1
+- completed:
+    hackage: text-iso8601-0.1@sha256:fc10d8de72fc094d0d299644f17421b9430d1c1092a1355c7f0c02d8b6edf6a7,2371
+    pantry-tree:
+      sha256: f72aa62f5f4d1155b3d3f35e8227548a27cee83fb5d0742564b5ef26597f1431
+      size: 427
+  original:
+    hackage: text-iso8601-0.1
+- completed:
+    name: libyaml
+    pantry-tree:
+      sha256: b46c46f4e960fbf89721c794072850751c2830d59b57e6da5425b100a1aa12a8
+      size: 1257
+    sha256: d8b59b6d8e231e4eb8c77607465b998b77cb7210df3b5d98afc2b12521c18240
+    size: 98661
+    subdir: libyaml
+    url: https://github.com/jgm/yaml/archive/c41822ba7ccc2afd619a664b5026349b416bd2eb.tar.gz
+    version: 0.1.3
+  original:
+    subdir: libyaml
+    url: https://github.com/jgm/yaml/archive/c41822ba7ccc2afd619a664b5026349b416bd2eb.tar.gz
+- completed:
+    name: yaml
+    pantry-tree:
+      sha256: 59f03cfd74d72a5c77037cc34f7e0388e24539f58ab56b7eec96960f92aa7705
+      size: 2206
+    sha256: d8b59b6d8e231e4eb8c77607465b998b77cb7210df3b5d98afc2b12521c18240
+    size: 98661
+    subdir: yaml
+    url: https://github.com/jgm/yaml/archive/c41822ba7ccc2afd619a664b5026349b416bd2eb.tar.gz
+    version: 0.11.11.1
+  original:
+    subdir: yaml
+    url: https://github.com/jgm/yaml/archive/c41822ba7ccc2afd619a664b5026349b416bd2eb.tar.gz
 snapshots:
 - completed:
-    sha256: c110d42fae0aff8f393c87e2f52e70c50653554c4a6b942e401f464ea4c08a80
-    size: 609034
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/nightly/2023/4/25.yaml
-  original: nightly-2023-04-25
+    sha256: fec3eb9ca6d240f95694cc0c4df065751fa93683314bfc25c6d1ba915ef56650
+    size: 539330
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/nightly/2023/6/30.yaml
+  original: nightly-2023-06-30
