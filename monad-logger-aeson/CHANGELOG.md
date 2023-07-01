@@ -1,5 +1,9 @@
 # Change log
 
+## 0.4.1.0
+
+* Support `aeson-2.2`
+
 ## 0.4.0.4
 
 * Relax upper bound on `fast-logger`: 2.11 -> 2.12
