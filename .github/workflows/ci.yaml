@@ -24,11 +24,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - uses: freckle/stack-cache-action@v2
-      with:
-        prefix: v1/
-        stack-yaml: stack/stack-${{ matrix.resolver }}.yaml
-    - uses: freckle/stack-action@v3
+    - id: stack
+      uses: freckle/stack-action@v4
       with:
         stack-yaml: stack/stack-${{ matrix.resolver }}.yaml
         stack-arguments: --bench --no-run-benchmarks --haddock --no-haddock-deps
