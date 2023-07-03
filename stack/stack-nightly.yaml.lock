@@ -27,7 +27,7 @@ packages:
     hackage: text-iso8601-0.1
 snapshots:
 - completed:
-    sha256: 170c1c74f9b4531349ba1ae58a3fe98b7d8970800f8ae88cdcf7440ec67ecceb
-    size: 539330
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/nightly/2023/7/1.yaml
-  original: nightly-2023-07-01
+    sha256: f37d78aa6b123334f2320ed0ae4c33234d9162cfdf676149ba3fe10faf44e7de
+    size: 539125
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/nightly/2023/7/3.yaml
+  original: nightly-2023-07-03
