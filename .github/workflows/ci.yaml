@@ -15,7 +15,7 @@ jobs:
         resolver:
         - nightly # ghc-9.6.2
         - lts-21  # ghc-9.4.5
-        - lts-20  # ghc-9.2.7
+        - lts-20  # ghc-9.2.8
         - lts-19  # ghc-9.0.2
         - lts-18  # ghc-8.10.7
         - lts-16  # ghc-8.8.4
