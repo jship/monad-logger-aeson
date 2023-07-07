@@ -1,4 +1,4 @@
-resolver: nightly-2023-07-03
+resolver: nightly-2023-07-06
 packages:
 - ../monad-logger-aeson
 extra-deps:
