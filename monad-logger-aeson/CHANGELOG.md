@@ -1,5 +1,9 @@
 # Change log
 
+## 0.4.1.1
+
+* Relax upper bound on `bytestring`: 0.12.0.0 -> 0.13.0.0
+
 ## 0.4.1.0
 
 * Support `aeson-2.2`
