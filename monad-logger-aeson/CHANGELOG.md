@@ -1,5 +1,9 @@
 # Change log
 
+## 0.4.1.2
+
+* Support GHC 9.8 by relaxing upper bound on `text`: 2.1 -> 2.2 (@rickowens)
+
 ## 0.4.1.1
 
 * Relax upper bound on `bytestring`: 0.12.0.0 -> 0.13.0.0
