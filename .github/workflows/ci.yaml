@@ -29,3 +29,35 @@ jobs:
       with:
         stack-yaml: stack/stack-${{ matrix.resolver }}.yaml
         stack-arguments: --bench --no-run-benchmarks --haddock --no-haddock-deps
+
+  build-9_8:
+    name: Haskell Build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macOS-latest]
+        ghc-version:
+          - '9.8'
+        cabal-version: ['3.10.2.0']
+    steps:
+      # Checkout
+      - uses: actions/checkout@v3
+        
+      # Setup
+      - name: Setup Haskell
+        uses: haskell-actions/setup@v2
+        id: setup
+        with:
+          ghc-version: ${{ matrix.ghc-version }}
+          cabal-version: ${{ matrix.cabal-version }}
+
+      - name: Cabal Bulid
+        run: |
+          (cat << EOF
+          tests: True
+          packages:
+            monad-logger-aeson
+          EOF
+          ) > cabal.project
+          cabal test all
